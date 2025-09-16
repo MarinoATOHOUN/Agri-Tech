@@ -1,0 +1,55 @@
+# Node.js / React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.vscode/
+dist/
+build/
+.cache/
+coverage/
+
+# Environment
+.env
+.env.*.local
+
+# Logs
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pot
+*.pyc
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# Virtual env
+.env/
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django specifics
+#staticfiles/
+#media/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
