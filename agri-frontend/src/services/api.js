@@ -9,7 +9,7 @@
 import axios from 'axios';
 
 // Configuration de base d'Axios
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://johnny001.pythonanywhere.com/api';
 
 // Instance Axios configurée
 const api = axios.create({
