@@ -1,4 +1,4 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
  * Composant principal de l'application de gestion agricole.
  * 
@@ -27,6 +27,8 @@ import Graphiques from './components/Graphiques';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ReportsPage from './components/ReportsPage';
+import Notifications from './components/Notifications';
+import LandingPage from './components/LandingPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -85,6 +87,14 @@ function App() {
     <Router>
       <div className="min-h-screen bg-agri-light-gray">
         <Routes>
+          {/* Landing Page */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />
+            }
+          />
+
           {/* Routes publiques */}
           <Route
             path="/login"
@@ -123,8 +133,9 @@ function App() {
                     <Route path="/historique" element={<Historique />} />
                     <Route path="/graphiques" element={<Graphiques />} />
                     <Route path="/rapports" element={<ReportsPage />} />
+                    <Route path="/notifications" element={<Notifications />} />
                     <Route path="/profil" element={<Profil user={user} setUser={setUser} />} />
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
                   </Routes>
                 </Layout>
               </PrivateRoute>

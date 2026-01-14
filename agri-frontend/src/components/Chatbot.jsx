@@ -1,4 +1,4 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 import React, { useState, useEffect, useRef } from 'react';
 import { chatbotService } from '../services/api';
 import { Send, MessageSquare, X, User, Cpu } from 'lucide-react';

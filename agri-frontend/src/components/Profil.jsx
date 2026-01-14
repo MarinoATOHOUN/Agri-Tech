@@ -1,4 +1,4 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
  * Composant Profil pour la gestion du profil utilisateur.
  */
@@ -51,7 +51,7 @@ const Profil = ({ user, setUser }) => {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -66,7 +66,7 @@ const Profil = ({ user, setUser }) => {
       ...prev,
       [name]: value
     }));
-    
+
     if (passwordErrors[name]) {
       setPasswordErrors(prev => ({
         ...prev,
@@ -123,7 +123,7 @@ const Profil = ({ user, setUser }) => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateProfileForm()) {
       return;
     }
@@ -152,7 +152,7 @@ const Profil = ({ user, setUser }) => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validatePasswordForm()) {
       return;
     }
@@ -517,7 +517,9 @@ const Profil = ({ user, setUser }) => {
             <div>
               <p className="text-sm text-gray-600">Date d'inscription</p>
               <p className="font-medium">
-                {user?.date_joined ? new Date(user.date_joined).toLocaleDateString('fr-FR') : 'Non disponible'}
+                {user?.date_joined || user?.date_creation
+                  ? new Date(user.date_joined || user.date_creation).toLocaleDateString('fr-FR')
+                  : 'Non disponible'}
               </p>
             </div>
             <div>

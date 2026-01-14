@@ -1,4 +1,4 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
  * Composant Dashboard pour le tableau de bord principal.
  * 
@@ -7,12 +7,12 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Sprout, 
-  Package, 
-  DollarSign, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Sprout,
+  Package,
+  DollarSign,
   AlertCircle,
   Plus,
   BarChart3
@@ -151,9 +151,8 @@ const Dashboard = () => {
               )}
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${
-                stats.benefice_net >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <div className={`text-2xl font-bold ${stats.benefice_net >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
                 {utils.formatCurrency(stats.benefice_net)}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -183,17 +182,17 @@ const Dashboard = () => {
                   <YAxis />
                   <Tooltip formatter={(value) => utils.formatCurrency(value)} />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenus" 
-                    stroke="#4CAF50" 
+                  <Line
+                    type="monotone"
+                    dataKey="revenus"
+                    stroke="#4CAF50"
                     strokeWidth={2}
                     name="Revenus"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="depenses" 
-                    stroke="#FF5722" 
+                  <Line
+                    type="monotone"
+                    dataKey="depenses"
+                    stroke="#FF5722"
                     strokeWidth={2}
                     name="Dépenses"
                   />
@@ -289,10 +288,9 @@ const Dashboard = () => {
                       {conseil.contenu.substring(0, 100)}...
                     </p>
                     <div className="flex items-center justify-between mt-2">
-                      <span className={`badge ${
-                        conseil.priorite === 'haute' ? 'badge-error' :
+                      <span className={`badge ${conseil.priorite === 'haute' ? 'badge-error' :
                         conseil.priorite === 'moyenne' ? 'badge-warning' : 'badge-info'
-                      }`}>
+                        }`}>
                         {conseil.priorite}
                       </span>
                       <span className="text-xs text-gray-500">
@@ -301,16 +299,19 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
-                {conseils.length > 3 && (
-                  <p className="text-sm text-gray-600 text-center">
-                    Et {conseils.length - 3} autre(s) conseil(s)...
-                  </p>
-                )}
+                <div className="pt-2">
+                  <Link to="/notifications" className="text-sm text-agri-green font-medium hover:underline flex items-center justify-center">
+                    Voir toutes les notifications
+                  </Link>
+                </div>
               </div>
             ) : (
-              <p className="text-gray-600 text-center py-4">
-                Aucun nouveau conseil pour le moment
-              </p>
+              <div className="text-center py-4">
+                <p className="text-gray-600 mb-3">Aucun nouveau conseil pour le moment</p>
+                <Link to="/notifications" className="text-sm text-agri-green font-medium hover:underline">
+                  Voir l'historique
+                </Link>
+              </div>
             )}
           </CardContent>
         </Card>

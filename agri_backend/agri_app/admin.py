@@ -1,4 +1,4 @@
-# © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+# © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 """
 Configuration de l'interface d'administration Django.
 

@@ -1,11 +1,11 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
  * Composant Layout pour la structure générale de l'application.
  * 
  * Inclut la navigation, le header et le footer.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
@@ -21,14 +21,34 @@ import {
   Bell,
   Sparkles as SparklesIcon
 } from 'lucide-react';
-import { authService } from '../services/api';
+import { authService, conseilService } from '../services/api';
 import { Button } from '@/components/ui/button';
 import Chatbot from './Chatbot';
 
 const Layout = ({ children, user, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const data = await conseilService.getAll({ lu: false });
+        const notifications = data.results || data;
+        setUnreadCount(notifications.length);
+      } catch (error) {
+        console.error('Erreur lors de la récupération du nombre de notifications:', error);
+      }
+    };
+
+    if (user) {
+      fetchUnreadCount();
+      // Rafraîchir toutes les 5 minutes
+      const interval = setInterval(fetchUnreadCount, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user, location.pathname]);
 
   // Navigation items
   const navigationItems = [
@@ -38,6 +58,7 @@ const Layout = ({ children, user, onLogout }) => {
     { name: 'Dépenses', href: '/depenses', icon: DollarSign },
     { name: 'Graphiques', href: '/graphiques', icon: BarChart3 },
     { name: 'Rapports IA', href: '/rapports', icon: SparklesIcon },
+    { name: 'Notifications', href: '/notifications', icon: Bell },
     { name: 'Historique', href: '/historique', icon: History },
     { name: 'Profil', href: '/profil', icon: User },
   ];
@@ -149,10 +170,18 @@ const Layout = ({ children, user, onLogout }) => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notifications (placeholder) */}
-              <button className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+              {/* Notifications */}
+              <Link
+                to="/notifications"
+                className={`p-2 rounded-md transition-colors duration-200 relative ${isActiveLink('/notifications') ? 'text-agri-green bg-green-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+              >
                 <Bell className="h-6 w-6" />
-              </button>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
 
               {/* User info */}
               <div className="flex items-center space-x-3">
@@ -184,14 +213,33 @@ const Layout = ({ children, user, onLogout }) => {
         </main>
 
         {/* Footer */}
-        <footer className="footer">
-          <div className="footer-content">
-            <p className="footer-text">
-              Application développée par <strong>Marino ATOHOUN</strong> © 2025
-            </p>
-            <p className="footer-text text-xs mt-2">
-              Gestion du rendement agricole pour les agriculteurs en Afrique
-            </p>
+        <footer className="bg-gray-900 text-white py-10 mt-12">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-agri-green mb-2">BlackBenAI</h3>
+              <p className="text-gray-400 max-w-2xl mx-auto italic">
+                "L'Intelligence Artificielle au service de l'Afrique.
+                BlackBenAI construit des modèles enracinés dans les réalités africaines pour transformer le continent."
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center space-y-4">
+              <p className="text-sm">
+                Développé par <a href="https://site-web-black-ben-ai.vercel.app/" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-agri-green transition-colors">BlackBenAI</a>
+              </p>
+              <p className="text-xs text-gray-500">
+                © 2025 AgriGestion. Tous droits réservés. <br />
+                Marino ATOHOUN - Fondateur & CEO de BlackBenAI.
+              </p>
+              <a
+                href="https://site-web-black-ben-ai.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-full transition-colors"
+              >
+                Visiter le site web
+              </a>
+            </div>
           </div>
         </footer>
       </div>

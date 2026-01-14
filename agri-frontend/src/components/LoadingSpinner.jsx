@@ -1,4 +1,4 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
  * Composant LoadingSpinner pour afficher un indicateur de chargement.
  */

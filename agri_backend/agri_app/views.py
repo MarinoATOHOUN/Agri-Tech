@@ -1,4 +1,4 @@
-# © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+# © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 """
 Vues API pour l'application de gestion agricole.
 
@@ -11,7 +11,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-from django.db.models import Sum, Avg, Count, Q, F, Subquery, OuterRef, DecimalField
+from django.contrib.auth.models import update_last_login
+from django.db.models import Sum, Avg, Count, Q, F, Subquery, OuterRef, DecimalField, Case, When
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -48,6 +49,7 @@ class UtilisateurProfilView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def login_view(request):
@@ -59,6 +61,7 @@ def login_view(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.validated_data['user']
+        update_last_login(None, user)
         token, created = Token.objects.get_or_create(user=user)
         
         return Response({
@@ -385,82 +388,182 @@ def dashboard_stats(request):
 @permission_classes([permissions.IsAuthenticated])
 def graphiques_donnees(request):
     """
-    Vue pour récupérer les données des graphiques.
+    Vue pour récupérer les données des graphiques avec des analyses avancées.
     """
     user = request.user
     
-    # Données pour le graphique des revenus par mois (12 derniers mois)
-    revenus_par_mois = []
-    depenses_par_mois = []
+    # 1. Évolution mensuelle (Revenus vs Dépenses)
+    evolution_mensuelle = []
+    tendance_cumulative = []
+    cumul_benefice = Decimal('0')
     
-    for i in range(12):
-        date_debut = timezone.now().replace(day=1) - timedelta(days=30*i)
-        date_fin = (date_debut + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+    # On récupère les 12 derniers mois
+    for i in range(11, -1, -1):
+        date_debut = (timezone.now().replace(day=1) - timedelta(days=30*i)).replace(day=1)
+        if date_debut.month == 12:
+            date_fin = date_debut.replace(year=date_debut.year + 1, month=1) - timedelta(days=1)
+        else:
+            date_fin = date_debut.replace(month=date_debut.month + 1) - timedelta(days=1)
         
-        # CORRIGÉ : Le calcul des revenus mensuels était incorrect.
         revenus_mois = Recolte.objects.filter(
             culture__utilisateur=user,
             date_recolte__range=[date_debut, date_fin]
         ).aggregate(
-            # Le calcul correct est la somme du produit (quantité * prix) pour chaque récolte
             total=Sum(F('quantite_recoltee') * F('prix_vente_unitaire'))
-        )['total'] or 0
+        )['total'] or Decimal('0')
         
         depenses_mois = Depense.objects.filter(
             utilisateur=user,
             date_depense__range=[date_debut, date_fin]
         ).aggregate(
             total=Sum('montant')
-        )['total'] or 0
+        )['total'] or Decimal('0')
         
-        revenus_par_mois.insert(0, {
-            'mois': date_debut.strftime('%Y-%m'),
-            'revenus': float(revenus_mois)
-        })
+        # Ajouter les coûts initiaux des cultures plantées ce mois-là
+        depenses_initiales = Culture.objects.filter(
+            utilisateur=user,
+            date_culture__range=[date_debut, date_fin]
+        ).aggregate(
+            total=Sum('cout_achat_semences') + Sum('cout_main_oeuvre')
+        )['total'] or Decimal('0')
         
-        depenses_par_mois.insert(0, {
-            'mois': date_debut.strftime('%Y-%m'),
-            'depenses': float(depenses_mois)
+        total_depenses_mois = depenses_mois + depenses_initiales
+        benefice_mois = revenus_mois - total_depenses_mois
+        cumul_benefice += benefice_mois
+        
+        mois_label = date_debut.strftime('%b %Y')
+        
+        evolution_mensuelle.append({
+            'mois': mois_label, 
+            'revenus': float(revenus_mois),
+            'depenses': float(total_depenses_mois)
         })
-    
-    # Données pour le graphique des cultures par rendement
-    cultures_rendement_query = Culture.objects.filter(
-        utilisateur=user,
-        superficie__gt=0
+        tendance_cumulative.append({'mois': mois_label, 'benefice_cumule': float(cumul_benefice)})
+
+    # 2. Performance par culture
+    revenues_subquery = Recolte.objects.filter(
+        culture=OuterRef('pk')
+    ).values('culture').annotate(
+        total=Sum(F('quantite_recoltee') * F('prix_vente_unitaire'))
+    ).values('total')
+
+    expenses_subquery = Depense.objects.filter(
+        culture=OuterRef('pk')
+    ).values('culture').annotate(
+        total=Sum('montant')
+    ).values('total')
+
+    recolte_quantite_subquery = Recolte.objects.filter(
+        culture=OuterRef('pk')
+    ).values('culture').annotate(
+        total=Sum('quantite_recoltee')
+    ).values('total')
+
+    cultures_stats = Culture.objects.filter(
+        utilisateur=user
     ).annotate(
-        total_recolte=Coalesce(Sum('recoltes__quantite_recoltee'), Decimal('0.0'))
+        total_revenus=Coalesce(Subquery(revenues_subquery, output_field=DecimalField()), Decimal('0.0')),
+        total_depenses_associees=Coalesce(Subquery(expenses_subquery, output_field=DecimalField()), Decimal('0.0')),
+        total_recolte=Coalesce(Subquery(recolte_quantite_subquery, output_field=DecimalField()), Decimal('0.0'))
     ).annotate(
-        rendement=F('total_recolte') / F('superficie')
-    ).values('nom', 'rendement', 'superficie')
-    
-    cultures_rendement = [
-        {
-            'nom': c['nom'],
-            'rendement': float(c['rendement'] or 0),
-            'superficie': float(c['superficie'])
-        } for c in cultures_rendement_query
+        total_depenses=F('cout_achat_semences') + F('cout_main_oeuvre') + F('total_depenses_associees'),
+        rendement=Case(
+            When(superficie__gt=0, then=F('total_recolte') / F('superficie')),
+            default=Decimal('0.0'),
+            output_field=DecimalField()
+        )
+    )
+
+    rendement_par_culture = [
+        {'nom': c.nom, 'rendement': float(c.rendement)} 
+        for c in cultures_stats if c.rendement > 0
     ]
 
-    # Données pour le graphique des dépenses par catégorie
-    depenses_par_categorie = Depense.objects.filter(
+    benefice_par_culture = [
+        {'nom': c.nom, 'benefice': float(c.total_revenus - c.total_depenses)} 
+        for c in cultures_stats
+    ]
+
+    # 3. Dépenses par catégorie
+    depenses_par_categorie_query = Depense.objects.filter(
         utilisateur=user
     ).values('categorie').annotate(
         total=Sum('montant')
     ).order_by('-total')
     
-    depenses_categories = [
-        {
-            'categorie': item['categorie'],
-            'total': float(item['total'])
-        }
-        for item in depenses_par_categorie
+    depenses_par_categorie = [
+        {'categorie': item['categorie'], 'total': float(item['total'])}
+        for item in depenses_par_categorie_query
     ]
+
+    # 4. Métriques globales
+    total_revenus = sum(c.total_revenus for c in cultures_stats)
+    total_depenses = sum(c.total_depenses for c in cultures_stats)
+    benefice_total = total_revenus - total_depenses
+
+    roi_moyen = float((benefice_total / total_depenses * 100)) if total_depenses > 0 else 0
+    marge_beneficiaire = float((benefice_total / total_revenus * 100)) if total_revenus > 0 else 0
     
+    cultures_avec_rendement = [c.rendement for c in cultures_stats if c.rendement > 0]
+    productivite_moyenne = float(sum(cultures_avec_rendement) / len(cultures_avec_rendement)) if cultures_avec_rendement else 0
+    
+    efficacite_couts = float(total_revenus / total_depenses) if total_depenses > 0 else 0
+
+    # 5. Insights
+    insights = []
+    if roi_moyen > 50:
+        insights.append({
+            'type': 'success',
+            'title': 'Excellente Rentabilité',
+            'message': f'Votre ROI moyen de {roi_moyen:.1f}% est exceptionnel.',
+            'recommendation': 'Continuez vos méthodes actuelles et envisagez d\'étendre vos superficies.'
+        })
+    elif roi_moyen < 10 and total_revenus > 0:
+        insights.append({
+            'type': 'warning',
+            'title': 'Rentabilité à Surveiller',
+            'message': f'Votre ROI de {roi_moyen:.1f}% est assez faible.',
+            'recommendation': 'Analysez vos postes de dépenses, notamment la main d\'œuvre et les intrants.'
+        })
+
+    if rendement_par_culture:
+        top_culture = max(cultures_stats, key=lambda x: x.rendement)
+        insights.append({
+            'type': 'info',
+            'title': 'Meilleure Performance',
+            'message': f'Le {top_culture.nom} a le meilleur rendement avec {top_culture.rendement:.1f} kg/ha.',
+            'recommendation': 'Identifiez les facteurs clés de succès de cette culture pour les appliquer aux autres.'
+        })
+
+    # 6. Objectifs (Simulés pour l'instant)
+    objectifs = {
+        'revenus': {
+            'nom': 'Objectif Revenus Annuel',
+            'actuel': float(total_revenus),
+            'cible': 2000000,
+            'pourcentage': float(min(total_revenus / 2000000 * 100, 150)) if 2000000 > 0 else 0
+        },
+        'rendement': {
+            'nom': 'Objectif Rendement Moyen',
+            'actuel': float(productivite_moyenne),
+            'cible': 1000,
+            'pourcentage': float(min(productivite_moyenne / 1000 * 100, 150)) if 1000 > 0 else 0
+        }
+    }
+
     return Response({
-        'revenus_par_mois': revenus_par_mois,
-        'depenses_par_mois': depenses_par_mois,
-        'cultures_rendement': cultures_rendement,
-        'depenses_par_categorie': depenses_categories
+        'revenus_par_mois': evolution_mensuelle,  # Gardé pour compatibilité frontend
+        'evolution_mensuelle': evolution_mensuelle,
+        'tendance_cumulative': tendance_cumulative,
+        'rendement_par_culture': rendement_par_culture,
+        'benefice_par_culture': benefice_par_culture,
+        'depenses_par_categorie': depenses_par_categorie,
+        'roi_moyen': roi_moyen,
+        'marge_beneficiaire': marge_beneficiaire,
+        'productivite_moyenne': productivite_moyenne,
+        'efficacite_couts': efficacite_couts,
+        'insights': insights,
+        'objectifs': objectifs
     })
 
 @api_view(['GET'])

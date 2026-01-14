@@ -1,4 +1,4 @@
-# © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+# © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 """
 Modèles de données pour l'application de gestion agricole.
 
@@ -167,8 +167,8 @@ class Culture(models.Model):
     @property
     def rendement_par_hectare(self):
         """Calcule le rendement par hectare si des récoltes existent."""
-        total_recolte = sum(r.quantite_recoltee for r in self.recoltes.all())
-        if self.superficie > 0:
+        total_recolte = sum(r.quantite_recoltee or Decimal('0.00') for r in self.recoltes.all())
+        if self.superficie and self.superficie > 0:
             return total_recolte / self.superficie
         return 0
 
@@ -259,12 +259,15 @@ class Recolte(models.Model):
     @property
     def revenus_totaux(self):
         """Calcule les revenus totaux de cette récolte."""
-        return self.quantite_recoltee * self.prix_vente_unitaire
+        quantite = self.quantite_recoltee or Decimal('0.00')
+        prix = self.prix_vente_unitaire or Decimal('0.00')
+        return quantite * prix
     
     @property
     def benefice_net(self):
         """Calcule le bénéfice net de cette récolte."""
-        return self.revenus_totaux - self.depenses_liees_recolte
+        depenses = self.depenses_liees_recolte or Decimal('0.00')
+        return self.revenus_totaux - depenses
 
 
 class Depense(models.Model):

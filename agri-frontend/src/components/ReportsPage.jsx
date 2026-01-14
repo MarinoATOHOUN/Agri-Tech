@@ -1,4 +1,4 @@
-// © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+// © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 import React, { useState, useEffect } from 'react';
 import { rapportService, utils } from '../services/api';
 import {

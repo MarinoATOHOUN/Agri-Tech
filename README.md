@@ -4,42 +4,42 @@ AgriGestion est une application web complète conçue pour aider les agriculteur
 
 ## Fonctionnalités
 
-*   **Gestion des Utilisateurs** : Inscription, connexion, gestion de profil.
-*   **Gestion des Cultures** : Enregistrement des cultures, dates de plantation, superficies, coûts initiaux.
-*   **Gestion des Récoltes** : Suivi des récoltes, quantités, qualités, prix de vente, revenus et bénéfices.
-*   **Gestion des Dépenses** : Enregistrement des dépenses par catégorie, association aux cultures.
-*   **Tableau de Bord Interactif** : Vue d'ensemble des statistiques clés, graphiques d'évolution des revenus/dépenses, répartition des dépenses.
-*   **Historique des Activités** : Chronologie complète des opérations agricoles avec filtres et export CSV.
-*   **Conseils Agricoles** : Affichage de conseils personnalisés (simulés pour cette version).
+* **Gestion des Utilisateurs** : Inscription, connexion, gestion de profil.
+* **Gestion des Cultures** : Enregistrement des cultures, dates de plantation, superficies, coûts initiaux.
+* **Gestion des Récoltes** : Suivi des récoltes, quantités, qualités, prix de vente, revenus et bénéfices.
+* **Gestion des Dépenses** : Enregistrement des dépenses par catégorie, association aux cultures.
+* **Tableau de Bord Interactif** : Vue d'ensemble des statistiques clés, graphiques d'évolution des revenus/dépenses, répartition des dépenses.
+* **Historique des Activités** : Chronologie complète des opérations agricoles avec filtres et export CSV.
+* **Conseils Agricoles** : Affichage de conseils personnalisés (simulés pour cette version).
 
 ## Technologies Utilisées
 
 ### Backend (API REST)
 
-*   **Python 3.11**
-*   **Django** : Framework web pour le développement rapide et sécurisé.
-*   **Django REST Framework (DRF)** : Pour la création d'API RESTful.
-*   **SQLite** : Base de données par défaut (peut être configurée pour PostgreSQL en production).
-*   **djangorestframework-simplejwt** : Pour l'authentification JWT.
-*   **django-cors-headers** : Pour gérer les requêtes Cross-Origin Resource Sharing (CORS).
+* **Python 3.11**
+* **Django** : Framework web pour le développement rapide et sécurisé.
+* **Django REST Framework (DRF)** : Pour la création d'API RESTful.
+* **SQLite** : Base de données par défaut (peut être configurée pour PostgreSQL en production).
+* **djangorestframework-simplejwt** : Pour l'authentification JWT.
+* **django-cors-headers** : Pour gérer les requêtes Cross-Origin Resource Sharing (CORS).
 
 ### Frontend (Application Web)
 
-*   **ReactJS** : Bibliothèque JavaScript pour la construction d'interfaces utilisateur interactives.
-*   **Vite** : Outil de build rapide pour les projets frontend.
-*   **Tailwind CSS** : Framework CSS utilitaire pour un stylisme rapide et réactif.
-*   **shadcn/ui** : Composants UI réutilisables basés sur Tailwind CSS.
-*   **Lucide Icons** : Bibliothèque d'icônes.
-*   **Recharts** : Bibliothèque de graphiques pour React.
-*   **Axios** : Client HTTP pour les requêtes API.
-*   **React Router DOM** : Pour la gestion du routage côté client.
+* **ReactJS** : Bibliothèque JavaScript pour la construction d'interfaces utilisateur interactives.
+* **Vite** : Outil de build rapide pour les projets frontend.
+* **Tailwind CSS** : Framework CSS utilitaire pour un stylisme rapide et réactif.
+* **shadcn/ui** : Composants UI réutilisables basés sur Tailwind CSS.
+* **Lucide Icons** : Bibliothèque d'icônes.
+* **Recharts** : Bibliothèque de graphiques pour React.
+* **Axios** : Client HTTP pour les requêtes API.
+* **React Router DOM** : Pour la gestion du routage côté client.
 
 ## Prérequis
 
 Assurez-vous d'avoir les éléments suivants installés sur votre machine :
 
-*   **Python 3.11** ou supérieur
-*   **Node.js** (version 18 ou supérieure) et **pnpm** (gestionnaire de paquets Node.js)
+* **Python 3.11** ou supérieur
+* **Node.js** (version 18 ou supérieure) et **pnpm** (gestionnaire de paquets Node.js)
 
 ## Instructions d'Installation et d'Exécution
 
@@ -110,7 +110,7 @@ Vous pouvez vous inscrire en tant que nouvel utilisateur ou utiliser le superuti
 
 ## Structure du Projet
 
-```
+```text
 agri-management-app/
 ├── agri_backend/             # Dossier du backend Django
 │   ├── agri_backend/         # Configuration du projet Django
@@ -162,8 +162,14 @@ agri-management-app/
 
 Pour le déploiement en production, il est recommandé d'utiliser un serveur web comme Nginx ou Apache pour servir les fichiers statiques du frontend et de configurer Gunicorn ou uWSGI pour servir l'application Django. La base de données SQLite devrait être remplacée par une base de données plus robuste comme PostgreSQL.
 
-## Auteur
+## Auteur et Vision
 
-**Marino ATOHOUN (RinoGeek)**
+**BlackBenAI**
+*Fondateur & CEO : Marino ATOHOUN*
 
-© 2025
+**L'Intelligence Artificielle au service de l'Afrique**
+BlackBenAI est une entreprise Béninoise spécialisée dans le développement de solutions IA pour le développement et l'émancipation technologique de l'Afrique. Nous construisons des modèles enracinés dans les réalités africaines pour transformer le continent.
+
+[Visiter le site web de BlackBenAI](https://site-web-black-ben-ai.vercel.app/)
+
+© 2025 AgriGestion - Propulsé par BlackBenAI.

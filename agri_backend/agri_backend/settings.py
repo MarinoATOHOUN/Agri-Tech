@@ -1,4 +1,4 @@
-# © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+# © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 """
 Configuration Django pour le projet agri_backend.
 

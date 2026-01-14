@@ -1,4 +1,4 @@
-# © 2025 - Développé par Marino ATOHOUN (RinoGeek)
+# © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 """
 Serializers pour l'API REST de l'application de gestion agricole.
 
@@ -27,7 +27,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'type_agriculture', 'zone_geographique', 'telephone',
-            'date_creation', 'password', 'password_confirm'
+            'date_creation', 'date_joined', 'last_login', 'password', 'password_confirm'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
@@ -74,9 +74,9 @@ class UtilisateurProfilSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'type_agriculture', 'zone_geographique', 'telephone',
-            'date_creation'
+            'date_creation', 'date_joined', 'last_login'
         ]
-        read_only_fields = ['id', 'username', 'date_creation']
+        read_only_fields = ['id', 'username', 'date_creation', 'date_joined', 'last_login']
 
 
 class CultureSerializer(serializers.ModelSerializer):
