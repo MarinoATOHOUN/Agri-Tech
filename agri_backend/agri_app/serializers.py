@@ -8,7 +8,7 @@ pour convertir les modèles en JSON et vice versa.
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat
 
 
 class UtilisateurSerializer(serializers.ModelSerializer):
@@ -245,3 +245,40 @@ class CultureDetailSerializer(CultureSerializer):
     
     class Meta(CultureSerializer.Meta):
         fields = CultureSerializer.Meta.fields + ['recoltes', 'depenses_associees']
+
+
+class RapportIASerializer(serializers.ModelSerializer):
+    """
+    Serializer pour le modèle RapportIA.
+    """
+    
+    class Meta:
+        model = RapportIA
+        fields = [
+            'id', 'utilisateur', 'titre', 'donnees_graphiques',
+            'analyse_complete', 'propositions_amelioration',
+            'points_progression', 'pdf_file', 'date_creation'
+        ]
+        read_only_fields = ['id', 'date_creation', 'pdf_file']
+
+
+class MessageChatSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour les messages du chat.
+    """
+    class Meta:
+        model = MessageChat
+        fields = ['id', 'est_utilisateur', 'contenu', 'date_envoi', 'contexte_donnees']
+        read_only_fields = ['date_envoi']
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour les conversations.
+    """
+    messages = MessageChatSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Conversation
+        fields = ['id', 'titre', 'date_creation', 'date_mise_a_jour', 'messages']
+        read_only_fields = ['date_creation', 'date_mise_a_jour']

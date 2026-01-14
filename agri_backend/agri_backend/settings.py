@@ -28,6 +28,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Définition des applications
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +41,91 @@ INSTALLED_APPS = [
     'agri_app',        # Notre application principale
 ]
 
+# Configuration Jazzmin
+JAZZMIN_SETTINGS = {
+    "site_title": "Agri-Management",
+    "site_header": "Agri-Management",
+    "site_brand": "Agri-Management",
+    "site_logo": None,
+    "login_logo": None,
+    "login_logo_dark": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Bienvenue sur Agri-Management",
+    "copyright": "RinoGeek",
+    "search_model": ["agri_app.Utilisateur", "agri_app.Culture"],
+    "user_avatar": None,
+    "topmenu_links": [
+        {"name": "Accueil", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"model": "auth.User"},
+        {"app": "agri_app"},
+    ],
+    "usermenu_links": [
+        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"model": "auth.user"}
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["agri_app", "agri_app.Utilisateur", "agri_app.Culture", "agri_app.Recolte", "agri_app.Depense"],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "agri_app.Utilisateur": "fas fa-user-tag",
+        "agri_app.Culture": "fas fa-seedling",
+        "agri_app.Recolte": "fas fa-tractor",
+        "agri_app.Depense": "fas fa-money-bill-wave",
+        "agri_app.ConseilAgricole": "fas fa-chalkboard-teacher",
+        "agri_app.RapportIA": "fas fa-robot",
+        "agri_app.Conversation": "fas fa-comments",
+        "agri_app.MessageChat": "fas fa-comment-dots",
+        "agri_app.UserLocation": "fas fa-map-marker-alt",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": False,
+    "custom_css": None,
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-success",
+    "accent": "accent-success",
+    "navbar": "navbar-success navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-light-success",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-success",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # CORS doit être en premier
     'django.middleware.security.SecurityMiddleware',
@@ -49,6 +135,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'agri_app.middleware.LocationTrackingMiddleware',
 ]
 
 ROOT_URLCONF = 'agri_backend.urls'
@@ -145,3 +232,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuration pour l'authentification personnalisée
 AUTH_USER_MODEL = 'agri_app.Utilisateur'
+
+# Configuration Gemini AI
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')

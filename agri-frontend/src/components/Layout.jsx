@@ -7,21 +7,23 @@
 
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Home, 
-  Sprout, 
-  Package, 
-  DollarSign, 
-  BarChart3, 
-  History, 
-  User, 
-  LogOut, 
-  Menu, 
+import {
+  Home,
+  Sprout,
+  Package,
+  DollarSign,
+  BarChart3,
+  History,
+  User,
+  LogOut,
+  Menu,
   X,
-  Bell
+  Bell,
+  Sparkles as SparklesIcon
 } from 'lucide-react';
 import { authService } from '../services/api';
 import { Button } from '@/components/ui/button';
+import Chatbot from './Chatbot';
 
 const Layout = ({ children, user, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,6 +37,7 @@ const Layout = ({ children, user, onLogout }) => {
     { name: 'Récoltes', href: '/recoltes', icon: Package },
     { name: 'Dépenses', href: '/depenses', icon: DollarSign },
     { name: 'Graphiques', href: '/graphiques', icon: BarChart3 },
+    { name: 'Rapports IA', href: '/rapports', icon: SparklesIcon },
     { name: 'Historique', href: '/historique', icon: History },
     { name: 'Profil', href: '/profil', icon: User },
   ];
@@ -62,7 +65,7 @@ const Layout = ({ children, user, onLogout }) => {
     <div className="min-h-screen bg-gray-50 lg:flex">
       {/* Sidebar mobile overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -91,15 +94,15 @@ const Layout = ({ children, user, onLogout }) => {
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const active = isActiveLink(item.href);
-              
+
               return (
                 <Link
                   key={item.name}
                   to={item.href}
                   className={`
                     nav-link group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200
-                    ${active 
-                      ? 'bg-agri-green text-white' 
+                    ${active
+                      ? 'bg-agri-green text-white'
                       : 'text-gray-700 hover:bg-green-50 hover:text-agri-green'
                     }
                   `}
@@ -192,6 +195,9 @@ const Layout = ({ children, user, onLogout }) => {
           </div>
         </footer>
       </div>
+
+      {/* Chatbot AI */}
+      <Chatbot />
     </div>
   );
 };

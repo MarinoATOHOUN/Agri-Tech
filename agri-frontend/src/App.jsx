@@ -26,6 +26,7 @@ import Historique from './components/Historique';
 import Graphiques from './components/Graphiques';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
+import ReportsPage from './components/ReportsPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,7 +38,7 @@ function App() {
     const checkAuth = () => {
       const authenticated = utils.isAuthenticated();
       const currentUser = utils.getCurrentUser();
-      
+
       setIsAuthenticated(authenticated);
       setUser(currentUser);
       setLoading(false);
@@ -51,7 +52,7 @@ function App() {
     if (loading) {
       return <LoadingSpinner />;
     }
-    
+
     return isAuthenticated ? children : <Navigate to="/login" replace />;
   };
 
@@ -60,7 +61,7 @@ function App() {
     if (loading) {
       return <LoadingSpinner />;
     }
-    
+
     return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
   };
 
@@ -121,6 +122,7 @@ function App() {
                     <Route path="/depenses/:id/modifier" element={<DepenseForm />} />
                     <Route path="/historique" element={<Historique />} />
                     <Route path="/graphiques" element={<Graphiques />} />
+                    <Route path="/rapports" element={<ReportsPage />} />
                     <Route path="/profil" element={<Profil user={user} setUser={setUser} />} />
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   </Routes>

@@ -17,12 +17,15 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat
 from .serializers import (
     UtilisateurSerializer, UtilisateurProfilSerializer, CultureSerializer,
     RecolteSerializer, DepenseSerializer, ConseilAgricoleSerializer,
-    LoginSerializer, DashboardStatsSerializer, CultureDetailSerializer
+    LoginSerializer, DashboardStatsSerializer, CultureDetailSerializer,
+    RapportIASerializer, ConversationSerializer, MessageChatSerializer
 )
+from .ai_service import GeminiService
+from .utils import generate_report_pdf
 
 
 class UtilisateurCreateView(generics.CreateAPIView):
@@ -460,7 +463,6 @@ def graphiques_donnees(request):
         'depenses_par_categorie': depenses_categories
     })
 
-
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def cultures_options(request):
@@ -472,3 +474,204 @@ def cultures_options(request):
     ).values('id', 'nom', 'date_culture')
     
     return Response(list(cultures))
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def chatbot_view(request):
+    """
+    Vue pour interagir avec le chatbot Gemini en utilisant les données de l'utilisateur.
+    Gère maintenant l'historique des conversations.
+    """
+    user = request.user
+    message_text = request.data.get('message')
+    conversation_id = request.data.get('conversation_id')
+    
+    if not message_text:
+        return Response({'error': 'Le message est requis'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Gestion de la conversation
+    if conversation_id:
+        try:
+            conversation = Conversation.objects.get(id=conversation_id, utilisateur=user)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Conversation introuvable'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        # Créer une nouvelle conversation avec un titre basé sur le premier message
+        titre = message_text[:50] + "..." if len(message_text) > 50 else message_text
+        conversation = Conversation.objects.create(utilisateur=user, titre=titre)
+    
+    # Sauvegarder le message de l'utilisateur
+    MessageChat.objects.create(
+        conversation=conversation,
+        est_utilisateur=True,
+        contenu=message_text
+    )
+    
+    # Rassembler toutes les données de l'utilisateur pour le contexte
+    cultures = Culture.objects.filter(utilisateur=user)
+    recoltes = Recolte.objects.filter(culture__utilisateur=user)
+    depenses = Depense.objects.filter(utilisateur=user)
+    
+    # On utilise les sérialiseurs pour formater les données
+    cultures_data = CultureSerializer(cultures, many=True).data
+    recoltes_data = RecolteSerializer(recoltes, many=True).data
+    depenses_data = DepenseSerializer(depenses, many=True).data
+    
+    # Calcul rapide des stats pour le contexte
+    revenus_totaux = sum((r.quantite_recoltee * r.prix_vente_unitaire for r in recoltes), Decimal('0'))
+    depenses_totales = (
+        sum((c.cout_achat_semences + c.cout_main_oeuvre for c in cultures), Decimal('0')) +
+        sum((r.depenses_liees_recolte for r in recoltes), Decimal('0')) +
+        sum((d.montant for d in depenses), Decimal('0'))
+    )
+    
+    user_data = {
+        'cultures': cultures_data,
+        'recoltes': recoltes_data,
+        'depenses': depenses_data,
+        'stats': {
+            'revenus_totaux': float(revenus_totaux),
+            'depenses_totales': float(depenses_totales),
+            'benefice_net': float(revenus_totaux - depenses_totales),
+        }
+    }
+    
+    # Ajouter le nom de la culture pour les récoltes
+    for r in user_data['recoltes']:
+        culture = next((c for c in cultures if c.id == r['culture']), None)
+        r['culture_nom'] = culture.nom if culture else "Inconnue"
+
+    # Appeler le service Gemini
+    ai_service = GeminiService()
+    
+    # Récupérer l'historique récent pour le contexte (optionnel, à implémenter dans ai_service)
+    # history = conversation.messages.order_by('date_envoi')[:10]
+    
+    response_text = ai_service.generate_response(user_data, message_text)
+    
+    # Sauvegarder la réponse de l'IA
+    MessageChat.objects.create(
+        conversation=conversation,
+        est_utilisateur=False,
+        contenu=response_text,
+        contexte_donnees=user_data # On sauvegarde le contexte utilisé
+    )
+    
+    return Response({
+        'response': response_text,
+        'conversation_id': conversation.id
+    })
+
+
+class ConversationListView(generics.ListAPIView):
+    """
+    Vue pour lister les conversations de l'utilisateur.
+    """
+    serializer_class = ConversationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return Conversation.objects.filter(utilisateur=self.request.user)
+
+
+class ConversationDetailView(generics.RetrieveAPIView):
+    """
+    Vue pour récupérer les détails d'une conversation (avec ses messages).
+    """
+    serializer_class = ConversationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'id'
+    
+    def get_queryset(self):
+        return Conversation.objects.filter(utilisateur=self.request.user)
+
+
+class RapportIAListView(generics.ListAPIView):
+    """
+    Vue pour lister les rapports IA de l'utilisateur.
+    """
+    serializer_class = RapportIASerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return RapportIA.objects.filter(utilisateur=self.request.user)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def generate_rapport_view(request):
+    """
+    Vue pour générer un nouveau rapport d'analyse IA.
+    """
+    user = request.user
+    
+    # 1. Rassembler les données
+    cultures = Culture.objects.filter(utilisateur=user)
+    recoltes = Recolte.objects.filter(culture__utilisateur=user)
+    depenses = Depense.objects.filter(utilisateur=user)
+    
+    cultures_data = CultureSerializer(cultures, many=True).data
+    recoltes_data = RecolteSerializer(recoltes, many=True).data
+    depenses_data = DepenseSerializer(depenses, many=True).data
+    
+    # Calculs stats rapides
+    revenus_totaux = sum((r.quantite_recoltee * r.prix_vente_unitaire for r in recoltes), Decimal('0'))
+    depenses_totales = (
+        sum((c.cout_achat_semences + c.cout_main_oeuvre for c in cultures), Decimal('0')) +
+        sum((r.depenses_liees_recolte for r in recoltes), Decimal('0')) +
+        sum((d.montant for d in depenses), Decimal('0'))
+    )
+    
+    user_data = {
+        'cultures': cultures_data,
+        'recoltes': recoltes_data,
+        'depenses': depenses_data,
+        'stats': {
+            'revenus_totaux': float(revenus_totaux),
+            'depenses_totales': float(depenses_totales),
+            'benefice_net': float(revenus_totaux - depenses_totales),
+        }
+    }
+    
+    # Enrichir les données de récolte
+    for r in user_data['recoltes']:
+        culture = next((c for c in cultures if c.id == r['culture']), None)
+        r['culture_nom'] = culture.nom if culture else "Inconnue"
+
+    # 2. Récupérer le résumé du dernier rapport pour la progression
+    last_report = RapportIA.objects.filter(utilisateur=user).first()
+    previous_summary = None
+    if last_report:
+        previous_summary = f"Dernier rapport ({last_report.date_creation}) : {last_report.analyse_complete[:500]}..."
+
+    # 3. Appeler l'IA
+    ai_service = GeminiService()
+    report_data = ai_service.generate_full_report(user_data, previous_summary)
+    
+    if not report_data:
+        return Response(
+            {'error': 'Impossible de générer le rapport pour le moment. Veuillez réessayer.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
+    # 4. Sauvegarder le rapport
+    rapport = RapportIA.objects.create(
+        utilisateur=user,
+        titre=report_data.get('titre', 'Rapport d\'analyse'),
+        donnees_graphiques=report_data.get('donnees_graphiques', {}),
+        analyse_complete=report_data.get('analyse_complete', ''),
+        propositions_amelioration=report_data.get('propositions_amelioration', ''),
+        points_progression=report_data.get('points_progression', '')
+    )
+    
+    # 5. Générer le PDF
+    try:
+        pdf_path = generate_report_pdf(rapport)
+        rapport.pdf_file = pdf_path
+        rapport.save()
+    except Exception as e:
+        print(f"Erreur génération PDF: {e}")
+        # On continue même si le PDF échoue, l'utilisateur aura au moins les données
+    
+    return Response(RapportIASerializer(rapport).data)

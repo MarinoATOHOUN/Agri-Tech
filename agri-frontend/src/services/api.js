@@ -9,7 +9,9 @@
 import axios from 'axios';
 
 // Configuration de base d'Axios
-const API_BASE_URL = 'https://johnny001.pythonanywhere.com/api';
+// Remplacez par l'URL de votre backend : en local : 'http://localhost:8000/api' ou en production : 'https://votre-domaine.com/api'.
+// Pour ce projet, nous utilisons l'URL de déploiement sur PythonAnywhere. 'https://johnny001.pythonanywhere.com/api'
+const API_BASE_URL = 'http://localhost:8000/api';
 
 // Instance Axios configurée
 const api = axios.create({
@@ -223,6 +225,30 @@ export const dashboardService = {
   // Récupérer les données des graphiques
   getChartData: async () => {
     const response = await api.get('/dashboard/graphiques/');
+    return response.data;
+  },
+};
+
+// Services pour le chatbot AI
+export const chatbotService = {
+  // Envoyer un message au chatbot
+  sendMessage: async (message) => {
+    const response = await api.post('/chatbot/', { message });
+    return response.data;
+  },
+};
+
+// Services pour les rapports IA
+export const rapportService = {
+  // Récupérer tous les rapports
+  getAll: async () => {
+    const response = await api.get('/rapports/');
+    return response.data;
+  },
+
+  // Générer un nouveau rapport
+  generate: async () => {
+    const response = await api.post('/rapports/generer/');
     return response.data;
   },
 };

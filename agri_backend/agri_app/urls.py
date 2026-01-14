@@ -35,4 +35,13 @@ urlpatterns = [
     # Tableau de bord et statistiques
     path('dashboard/stats/', views.dashboard_stats, name='dashboard-stats'),
     path('dashboard/graphiques/', views.graphiques_donnees, name='graphiques-donnees'),
+    
+    # Chatbot AI et Conversations
+    path('chatbot/', views.chatbot_view, name='chatbot'),
+    path('conversations/', views.ConversationListView.as_view(), name='conversation-list'),
+    path('conversations/<int:id>/', views.ConversationDetailView.as_view(), name='conversation-detail'),
+    
+    # Rapports IA
+    path('rapports/', views.RapportIAListView.as_view(), name='rapport-list'),
+    path('rapports/generer/', views.generate_rapport_view, name='generer-rapport'),
 ]

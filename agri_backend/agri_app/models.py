@@ -160,7 +160,9 @@ class Culture(models.Model):
     @property
     def cout_total_initial(self):
         """Calcule le coût total initial de la culture."""
-        return self.cout_achat_semences + self.cout_main_oeuvre
+        achat = self.cout_achat_semences or 0
+        main_oeuvre = self.cout_main_oeuvre or 0
+        return achat + main_oeuvre
     
     @property
     def rendement_par_hectare(self):
@@ -296,7 +298,7 @@ class Depense(models.Model):
     culture = models.ForeignKey(
         Culture,
         on_delete=models.CASCADE,
-        related_name='depenses_associees',
+        related_name='depenses',
         blank=True,
         null=True,
         verbose_name="Culture associée",
@@ -432,4 +434,201 @@ class ConseilAgricole(models.Model):
         ordering = ['-date_creation']
     
     def __str__(self):
-        return f"{self.titre} - {self.utilisateur.username}"
+        return f"{self.titre} ({self.get_type_conseil_display()})"
+
+
+class Conversation(models.Model):
+    """
+    Regroupe une série d'échanges entre l'utilisateur et l'IA.
+    """
+    utilisateur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='conversations',
+        verbose_name="Utilisateur"
+    )
+    
+    titre = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Titre de la conversation"
+    )
+    
+    date_creation = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date de début"
+    )
+    
+    date_mise_a_jour = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Dernière activité"
+    )
+    
+    class Meta:
+        ordering = ['-date_mise_a_jour']
+        verbose_name = "Conversation IA"
+        verbose_name_plural = "Conversations IA"
+    
+    def __str__(self):
+        return f"{self.titre or 'Nouvelle conversation'} ({self.date_creation.strftime('%d/%m/%Y')})"
+
+
+class MessageChat(models.Model):
+    """
+    Un message individuel dans une conversation (User ou IA).
+    """
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name="Conversation"
+    )
+    
+    est_utilisateur = models.BooleanField(
+        default=True,
+        verbose_name="Est l'utilisateur ?",
+        help_text="Vrai si le message vient de l'utilisateur, Faux si c'est l'IA"
+    )
+    
+    contenu = models.TextField(
+        verbose_name="Contenu du message"
+    )
+    
+    date_envoi = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date d'envoi"
+    )
+    
+    contexte_donnees = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name="Données contextuelles",
+        help_text="Snapshot des données utilisées pour générer la réponse (si IA)"
+    )
+    
+    class Meta:
+        ordering = ['date_envoi']
+        verbose_name = "Message Chat"
+        verbose_name_plural = "Messages Chat"
+    
+    def __str__(self):
+        sender = "User" if self.est_utilisateur else "IA"
+        return f"{sender}: {self.contenu[:50]}..."
+
+
+class RapportIA(models.Model):
+    """
+    Modèle pour stocker les rapports d'analyse complets générés par l'IA.
+    """
+    
+    utilisateur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='rapports_ia',
+        verbose_name="Agriculteur"
+    )
+    
+    titre = models.CharField(
+        max_length=255,
+        verbose_name="Titre du rapport"
+    )
+    
+    # Stockage des données structurées pour les graphiques
+    donnees_graphiques = models.JSONField(
+        default=dict,
+        verbose_name="Données pour les graphiques",
+        help_text="Données structurées (JSON) pour générer des graphiques sur le frontend"
+    )
+    
+    analyse_complete = models.TextField(
+        verbose_name="Analyse complète",
+        help_text="Texte détaillé de l'analyse générée par l'IA"
+    )
+    
+    propositions_amelioration = models.TextField(
+        verbose_name="Propositions d'amélioration",
+        help_text="Liste des suggestions pour améliorer l'exploitation"
+    )
+    
+    points_progression = models.TextField(
+        verbose_name="Points de progression",
+        help_text="Analyse de l'évolution par rapport aux rapports précédents"
+    )
+    
+    pdf_file = models.FileField(
+        upload_to='rapports_pdf/',
+        null=True,
+        blank=True,
+        verbose_name="Fichier PDF"
+    )
+    
+    date_creation = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date de génération"
+    )
+    
+    class Meta:
+        verbose_name = "Rapport IA"
+        verbose_name_plural = "Rapports IA"
+        ordering = ['-date_creation']
+    
+    def __str__(self):
+        return f"Rapport du {self.date_creation.strftime('%d/%m/%Y')} - {self.utilisateur.username}"
+
+
+class UserLocation(models.Model):
+    """
+    Modèle pour stocker l'historique de localisation de l'utilisateur.
+    """
+    utilisateur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='locations',
+        verbose_name="Utilisateur"
+    )
+    
+    ip_address = models.GenericIPAddressField(
+        verbose_name="Adresse IP"
+    )
+    
+    latitude = models.FloatField(
+        null=True, 
+        blank=True,
+        verbose_name="Latitude"
+    )
+    
+    longitude = models.FloatField(
+        null=True, 
+        blank=True,
+        verbose_name="Longitude"
+    )
+    
+    city = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="Ville"
+    )
+    
+    country = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="Pays"
+    )
+    
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Date et heure"
+    )
+    
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = "Localisation Utilisateur"
+        verbose_name_plural = "Localisations Utilisateurs"
+        indexes = [
+            models.Index(fields=['utilisateur', '-timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"{self.utilisateur.username} - {self.city}, {self.country} ({self.timestamp})"
