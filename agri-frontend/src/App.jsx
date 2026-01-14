@@ -29,6 +29,11 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ReportsPage from './components/ReportsPage';
 import Notifications from './components/Notifications';
 import LandingPage from './components/LandingPage';
+import Abonnement from './components/Abonnement';
+import Support from './components/Support';
+import Marketplace from './components/Marketplace';
+import AnnonceForm from './components/AnnonceForm';
+import AILab from './components/AILab';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -134,6 +139,11 @@ function App() {
                     <Route path="/graphiques" element={<Graphiques />} />
                     <Route path="/rapports" element={<ReportsPage />} />
                     <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/abonnement" element={<Abonnement />} />
+                    <Route path="/support" element={<Support />} />
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/marketplace/vendre" element={<AnnonceForm />} />
+                    <Route path="/ia" element={<AILab />} />
                     <Route path="/profil" element={<Profil user={user} setUser={setUser} />} />
                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                   </Routes>

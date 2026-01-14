@@ -528,6 +528,12 @@ const Profil = ({ user, setUser }) => {
                 {user?.last_login ? new Date(user.last_login).toLocaleDateString('fr-FR') : 'Non disponible'}
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-600">Plan d'abonnement</p>
+              <p className="font-medium capitalize text-agri-green">
+                {user?.plan_abonnement || 'Gratuit'}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

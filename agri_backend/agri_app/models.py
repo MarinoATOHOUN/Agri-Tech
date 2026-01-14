@@ -48,6 +48,19 @@ class Utilisateur(AbstractUser):
         help_text="Numéro de téléphone pour les notifications SMS"
     )
     
+    PLAN_ABONNEMENT_CHOICES = [
+        ('gratuit', 'Gratuit'),
+        ('pro', 'Professionnel'),
+        ('expert', 'Expert / Coopérative'),
+    ]
+
+    plan_abonnement = models.CharField(
+        max_length=20,
+        choices=PLAN_ABONNEMENT_CHOICES,
+        default='gratuit',
+        verbose_name="Plan d'abonnement"
+    )
+
     date_creation = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Date de création du compte"
@@ -635,3 +648,77 @@ class UserLocation(models.Model):
     
     def __str__(self):
         return f"{self.utilisateur.username} - {self.city}, {self.country} ({self.timestamp})"
+
+
+class SupportMessage(models.Model):
+    """
+    Modèle pour les messages de support et propositions des utilisateurs.
+    """
+    utilisateur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='messages_support',
+        verbose_name="Utilisateur"
+    )
+    sujet = models.CharField(max_length=200, verbose_name="Sujet")
+    message = models.TextField(verbose_name="Message")
+    date_envoi = models.DateTimeField(auto_now_add=True, verbose_name="Date d'envoi")
+    traite = models.BooleanField(default=False, verbose_name="Traité")
+
+    class Meta:
+        verbose_name = "Message de Support"
+        verbose_name_plural = "Messages de Support"
+        ordering = ['-date_envoi']
+
+    def __str__(self):
+        return f"{self.sujet} - {self.utilisateur.username}"
+
+
+class ProduitAnnonce(models.Model):
+    """
+    Modèle pour les annonces de produits agricoles sur la marketplace.
+    """
+    CATEGORIE_CHOICES = [
+        ('cereales', 'Céréales'),
+        ('tubercules', 'Tubercules'),
+        ('fruits', 'Fruits'),
+        ('legumes', 'Légumes'),
+        ('elevage', 'Élevage'),
+        ('intrants', 'Semences & Intrants'),
+        ('materiel', 'Matériel Agricole'),
+        ('autre', 'Autre'),
+    ]
+
+    utilisateur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='annonces',
+        verbose_name="Vendeur"
+    )
+    nom = models.CharField(max_length=200, verbose_name="Nom du produit")
+    description = models.TextField(verbose_name="Description détaillée")
+    prix = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Prix")
+    unite = models.CharField(max_length=50, verbose_name="Unité (ex: kg, sac, tonne)")
+    quantite_disponible = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Quantité disponible")
+    categorie = models.CharField(max_length=50, choices=CATEGORIE_CHOICES, verbose_name="Catégorie")
+    localisation = models.CharField(max_length=255, verbose_name="Localisation du produit")
+    image = models.ImageField(upload_to='annonces/', null=True, blank=True, verbose_name="Image du produit")
+    
+    # Contact
+    telephone_contact = models.CharField(max_length=20, verbose_name="Téléphone de contact")
+    email_contact = models.EmailField(verbose_name="Email de contact")
+    lien_externe = models.URLField(blank=True, null=True, verbose_name="Lien externe (ex: site web, WhatsApp)")
+
+    # Statut
+    est_publie = models.BooleanField(default=False, verbose_name="Est publié")
+    paiement_effectue = models.BooleanField(default=False, verbose_name="Paiement frais de mise en rayon effectué")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_expiration = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Annonce Produit"
+        verbose_name_plural = "Annonces Produits"
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"{self.nom} - {self.prix} FCFA"

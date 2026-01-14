@@ -19,7 +19,11 @@ import {
   Menu,
   X,
   Bell,
-  Sparkles as SparklesIcon
+  Sparkles as SparklesIcon,
+  CreditCard,
+  LifeBuoy,
+  ShoppingBag,
+  BrainCircuit
 } from 'lucide-react';
 import { authService, conseilService } from '../services/api';
 import { Button } from '@/components/ui/button';
@@ -59,6 +63,10 @@ const Layout = ({ children, user, onLogout }) => {
     { name: 'Graphiques', href: '/graphiques', icon: BarChart3 },
     { name: 'Rapports IA', href: '/rapports', icon: SparklesIcon },
     { name: 'Notifications', href: '/notifications', icon: Bell },
+    { name: 'Abonnement', href: '/abonnement', icon: CreditCard },
+    { name: 'Annonces', href: '/marketplace', icon: ShoppingBag },
+    { name: 'IA Lab', href: '/ia', icon: BrainCircuit },
+    { name: 'Support', href: '/support', icon: LifeBuoy },
     { name: 'Historique', href: '/historique', icon: History },
     { name: 'Profil', href: '/profil', icon: User },
   ];

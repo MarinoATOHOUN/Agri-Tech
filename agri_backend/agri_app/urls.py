@@ -44,4 +44,14 @@ urlpatterns = [
     # Rapports IA
     path('rapports/', views.RapportIAListView.as_view(), name='rapport-list'),
     path('rapports/generer/', views.generate_rapport_view, name='generer-rapport'),
+    
+    # Support
+    path('support/', views.SupportMessageListCreateView.as_view(), name='support-list-create'),
+    
+    # Marketplace (Annonces)
+    path('annonces/', views.ProduitAnnonceListView.as_view(), name='annonce-list'),
+    path('annonces/creer/', views.ProduitAnnonceCreateView.as_view(), name='annonce-create'),
+    path('annonces/mes-annonces/', views.MesAnnoncesListView.as_view(), name='mes-annonces'),
+    path('annonces/<int:pk>/', views.ProduitAnnonceDetailView.as_view(), name='annonce-detail'),
+    path('annonces/<int:pk>/payer/', views.simuler_paiement_annonce, name='annonce-payer'),
 ]

@@ -8,7 +8,7 @@ pour convertir les modèles en JSON et vice versa.
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, SupportMessage, ProduitAnnonce
 
 
 class UtilisateurSerializer(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'type_agriculture', 'zone_geographique', 'telephone',
-            'date_creation', 'date_joined', 'last_login', 'password', 'password_confirm'
+            'date_creation', 'date_joined', 'last_login', 'plan_abonnement', 'password', 'password_confirm'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
@@ -74,7 +74,7 @@ class UtilisateurProfilSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'type_agriculture', 'zone_geographique', 'telephone',
-            'date_creation', 'date_joined', 'last_login'
+            'date_creation', 'date_joined', 'last_login', 'plan_abonnement'
         ]
         read_only_fields = ['id', 'username', 'date_creation', 'date_joined', 'last_login']
 
@@ -282,3 +282,32 @@ class ConversationSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = ['id', 'titre', 'date_creation', 'date_mise_a_jour', 'messages']
         read_only_fields = ['date_creation', 'date_mise_a_jour']
+
+
+class SupportMessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour les messages de support.
+    """
+    class Meta:
+        model = SupportMessage
+        fields = ['id', 'utilisateur', 'sujet', 'message', 'date_envoi', 'traite']
+        read_only_fields = ['id', 'utilisateur', 'date_envoi', 'traite']
+
+
+class ProduitAnnonceSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour les annonces de produits.
+    """
+    vendeur_nom = serializers.ReadOnlyField(source='utilisateur.get_full_name')
+    
+    class Meta:
+        model = ProduitAnnonce
+        fields = [
+            'id', 'utilisateur', 'vendeur_nom', 'nom', 'description', 'prix', 
+            'unite', 'quantite_disponible', 'categorie', 'localisation', 
+            'image', 'telephone_contact', 'email_contact', 'lien_externe', 
+            'est_publie', 'paiement_effectue', 'date_creation'
+        ]
+        read_only_fields = ['id', 'utilisateur', 'est_publie', 'paiement_effectue', 'date_creation']
+
+

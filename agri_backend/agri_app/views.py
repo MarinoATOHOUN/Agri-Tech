@@ -18,12 +18,12 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, SupportMessage, ProduitAnnonce
 from .serializers import (
     UtilisateurSerializer, UtilisateurProfilSerializer, CultureSerializer,
     RecolteSerializer, DepenseSerializer, ConseilAgricoleSerializer,
     LoginSerializer, DashboardStatsSerializer, CultureDetailSerializer,
-    RapportIASerializer, ConversationSerializer, MessageChatSerializer
+    RapportIASerializer, ConversationSerializer, MessageChatSerializer, SupportMessageSerializer, ProduitAnnonceSerializer
 )
 from .ai_service import GeminiService
 from .utils import generate_report_pdf
@@ -778,3 +778,78 @@ def generate_rapport_view(request):
         # On continue même si le PDF échoue, l'utilisateur aura au moins les données
     
     return Response(RapportIASerializer(rapport).data)
+class SupportMessageListCreateView(generics.ListCreateAPIView):
+    """
+    Vue pour lister et créer des messages de support.
+    """
+    serializer_class = SupportMessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return SupportMessage.objects.filter(utilisateur=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(utilisateur=self.request.user)
+
+
+class ProduitAnnonceListView(generics.ListAPIView):
+    """
+    Vue publique pour lister les annonces publiées.
+    """
+    serializer_class = ProduitAnnonceSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = ProduitAnnonce.objects.filter(est_publie=True)
+        categorie = self.request.query_params.get('categorie')
+        if categorie:
+            queryset = queryset.filter(categorie=categorie)
+        return queryset
+
+
+class ProduitAnnonceCreateView(generics.CreateAPIView):
+    """
+    Vue pour créer une annonce (nécessite d'être connecté).
+    """
+    serializer_class = ProduitAnnonceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(utilisateur=self.request.user)
+
+
+class ProduitAnnonceDetailView(generics.RetrieveAPIView):
+    """
+    Vue pour voir les détails d'une annonce.
+    """
+    queryset = ProduitAnnonce.objects.all()
+    serializer_class = ProduitAnnonceSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class MesAnnoncesListView(generics.ListAPIView):
+    """
+    Vue pour lister les annonces de l'utilisateur connecté.
+    """
+    serializer_class = ProduitAnnonceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ProduitAnnonce.objects.filter(utilisateur=self.request.user)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def simuler_paiement_annonce(request, pk):
+    """
+    Simule le paiement des frais de mise en rayon.
+    """
+    try:
+        annonce = ProduitAnnonce.objects.get(pk=pk, utilisateur=request.user)
+        annonce.paiement_effectue = True
+        annonce.est_publie = True
+        annonce.save()
+        return Response({'status': 'success', 'message': 'Paiement effectué et annonce publiée !'})
+    except ProduitAnnonce.DoesNotExist:
+        return Response({'status': 'error', 'message': 'Annonce non trouvée.'}, status=status.HTTP_404_NOT_FOUND)
+

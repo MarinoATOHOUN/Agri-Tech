@@ -14,7 +14,11 @@ import {
     Users,
     TrendingUp,
     Leaf,
-    Cpu
+    Cpu,
+    Sparkles,
+    Scan,
+    BrainCircuit,
+    CheckCircle2
 } from 'lucide-react';
 
 const LandingPage = () => {
@@ -32,6 +36,7 @@ const LandingPage = () => {
                             <a href="#features" className="text-gray-600 hover:text-agri-green transition-colors">Fonctionnalités</a>
                             <a href="#impact" className="text-gray-600 hover:text-agri-green transition-colors">Impact Afrique</a>
                             <a href="#vision" className="text-gray-600 hover:text-agri-green transition-colors">Notre Vision</a>
+                            <Link to="/ia" className="text-gray-600 hover:text-agri-green transition-colors">IA Lab</Link>
                             <Link to="/login" className="text-gray-600 hover:text-agri-green transition-colors">Connexion</Link>
                             <Link to="/register" className="bg-agri-green text-white px-6 py-2 rounded-full font-medium hover:bg-green-600 transition-all shadow-lg shadow-green-200">
                                 S'inscrire
@@ -158,6 +163,80 @@ const LandingPage = () => {
                     </div>
                 </div>
             </section>
+
+            {/* AI Innovation Section */}
+            <section className="py-24 bg-white overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="lg:grid lg:grid-cols-2 gap-16 items-center">
+                        <div className="relative order-2 lg:order-1">
+                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-agri-green/10 rounded-full blur-3xl"></div>
+                            <div className="relative bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-slate-800">
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">AgriVision Live</span>
+                                        </div>
+                                        <BrainCircuit className="h-6 w-6 text-agri-green" />
+                                    </div>
+                                    <div className="aspect-video bg-slate-800 rounded-2xl flex items-center justify-center relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&q=80&w=800')] bg-cover bg-center opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+                                        <div className="relative z-10 text-center">
+                                            <div className="bg-white/10 backdrop-blur-md p-4 rounded-full mb-3 inline-block">
+                                                <Scan className="h-8 w-8 text-white" />
+                                            </div>
+                                            <p className="text-white text-sm font-bold">Scan en cours...</p>
+                                        </div>
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-agri-green shadow-[0_0_15px_rgba(34,197,94,0.8)] animate-scan"></div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                            <p className="text-slate-500 text-[10px] uppercase font-bold">Précision</p>
+                                            <p className="text-white text-xl font-black">98.4%</p>
+                                        </div>
+                                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                            <p className="text-slate-500 text-[10px] uppercase font-bold">Latence</p>
+                                            <p className="text-white text-xl font-black">45ms</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-8 order-1 lg:order-2">
+                            <div className="inline-flex items-center space-x-2 bg-green-50 px-4 py-2 rounded-full text-agri-green text-sm font-semibold">
+                                <Sparkles className="h-4 w-4" />
+                                <span>Futur & Innovation</span>
+                            </div>
+                            <h2 className="text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
+                                L'Intelligence Artificielle qui <span className="text-agri-green">comprend</span> votre terre.
+                            </h2>
+                            <p className="text-xl text-gray-600 leading-relaxed">
+                                Avec BlackBenAI, nous repoussons les limites. Nos futurs modèles de Computer Vision et de Deep Learning détecteront les maladies avant même qu'elles ne soient visibles à l'œil nu.
+                            </p>
+                            <ul className="space-y-4">
+                                {[
+                                    "Détection automatique des mauvaises herbes",
+                                    "Identification instantanée des insectes nuisibles",
+                                    "Optimisation prédictive des cycles de culture",
+                                    "Conseiller agronomique LLM multilingue"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center space-x-3 text-gray-700 font-medium">
+                                        <div className="bg-agri-green rounded-full p-1">
+                                            <CheckCircle2 className="h-3 w-3 text-white" />
+                                        </div>
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link to="/ia" className="inline-flex items-center text-agri-green font-bold text-lg hover:underline group">
+                                Explorer le IA Lab
+                                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
 
             {/* Impact Section */}
             <section id="impact" className="py-24 relative overflow-hidden bg-gray-900 text-white">

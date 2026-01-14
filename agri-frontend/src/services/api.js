@@ -253,6 +253,62 @@ export const rapportService = {
   },
 };
 
+// Services pour le support
+export const supportService = {
+  // Récupérer tous les messages de support
+  getAll: async () => {
+    const response = await api.get('/support/');
+    return response.data;
+  },
+
+  // Envoyer un nouveau message de support
+  send: async (messageData) => {
+    const response = await api.post('/support/', messageData);
+    return response.data;
+  },
+};
+
+// Services pour la marketplace (Annonces)
+export const annonceService = {
+  // Récupérer toutes les annonces publiées
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams(filters);
+    const response = await api.get(`/annonces/?${params}`);
+    return response.data;
+  },
+
+  // Récupérer les annonces de l'utilisateur
+  getMine: async () => {
+    const response = await api.get('/annonces/mes-annonces/');
+    return response.data;
+  },
+
+  // Récupérer une annonce par ID
+  getById: async (id) => {
+    const response = await api.get(`/annonces/${id}/`);
+    return response.data;
+  },
+
+  // Créer une nouvelle annonce
+  create: async (annonceData) => {
+    // Utiliser FormData pour l'upload d'image
+    const response = await api.post('/annonces/creer/', annonceData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Simuler le paiement et publier
+  payAndPublish: async (id) => {
+    const response = await api.post(`/annonces/${id}/payer/`);
+    return response.data;
+  },
+};
+
+
+
 // Utilitaires
 export const utils = {
   // Vérifier si l'utilisateur est connecté

@@ -10,7 +10,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from django.db.models import Sum, F
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, UserLocation
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, UserLocation, SupportMessage, ProduitAnnonce
 
 
 # --- INLINES ---
@@ -444,3 +444,41 @@ class UserLocationAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(SupportMessage)
+class SupportMessageAdmin(admin.ModelAdmin):
+    """
+    Configuration de l'administration pour le modèle SupportMessage.
+    """
+    list_display = ('sujet', 'utilisateur', 'date_envoi', 'traite')
+    list_filter = ('traite', 'date_envoi')
+    search_fields = ('sujet', 'message', 'utilisateur__username')
+    readonly_fields = ('date_envoi',)
+    actions = ['marquer_comme_traite']
+
+    def marquer_comme_traite(self, request, queryset):
+        queryset.update(traite=True)
+    marquer_comme_traite.short_description = "Marquer comme traité"
+
+
+@admin.register(ProduitAnnonce)
+class ProduitAnnonceAdmin(admin.ModelAdmin):
+    """
+    Configuration de l'administration pour le modèle ProduitAnnonce.
+    """
+    list_display = ('nom', 'utilisateur', 'prix', 'categorie', 'est_publie', 'paiement_effectue')
+    list_filter = ('categorie', 'est_publie', 'paiement_effectue', 'date_creation')
+    search_fields = ('nom', 'description', 'utilisateur__username', 'localisation')
+    readonly_fields = ('date_creation',)
+    actions = ['publier_annonces', 'retirer_annonces']
+
+    def publier_annonces(self, request, queryset):
+        queryset.update(est_publie=True)
+    publier_annonces.short_description = "Publier les annonces sélectionnées"
+
+    def retirer_annonces(self, request, queryset):
+        queryset.update(est_publie=False)
+    retirer_annonces.short_description = "Retirer les annonces sélectionnées"
+
+
