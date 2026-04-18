@@ -14,6 +14,7 @@ urlpatterns = [
     path('auth/login/', views.login_view, name='login'),
     path('auth/logout/', views.logout_view, name='logout'),
     path('auth/profile/', views.UtilisateurProfilView.as_view(), name='profile'),
+    path('auth/change-password/', views.change_password_view, name='change-password'),
     
     # Cultures
     path('cultures/', views.CultureListCreateView.as_view(), name='culture-list-create'),
@@ -47,6 +48,8 @@ urlpatterns = [
     
     # Support
     path('support/', views.SupportMessageListCreateView.as_view(), name='support-list-create'),
+    path('newsletter/', views.NewsletterSubscriptionView.as_view(), name='newsletter-subscribe'),
+    path('contact/', views.ContactMessageCreateView.as_view(), name='contact-create'),
     
     # Marketplace (Annonces)
     path('annonces/', views.ProduitAnnonceListView.as_view(), name='annonce-list'),

@@ -5,14 +5,14 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sprout, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Sprout, Eye, EyeOff, Loader2, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authService } from '../services/api';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -20,18 +20,15 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Gérer les changements dans les champs du formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    // Effacer l'erreur quand l'utilisateur tape
     if (error) setError('');
   };
 
-  // Gérer la soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -44,18 +41,17 @@ const Login = ({ onLogin }) => {
     } catch (error) {
       console.error('Erreur de connexion:', error);
       if (error.response?.data) {
-        // Erreur du serveur
         const errorData = error.response.data;
         if (typeof errorData === 'string') {
           setError(errorData);
         } else if (errorData.non_field_errors) {
           setError(errorData.non_field_errors[0]);
-        } else if (errorData.username) {
-          setError(`Nom d'utilisateur: ${errorData.username[0]}`);
+        } else if (errorData.email) {
+          setError(`Email: ${errorData.email[0]}`);
         } else if (errorData.password) {
           setError(`Mot de passe: ${errorData.password[0]}`);
         } else {
-          setError('Nom d\'utilisateur ou mot de passe incorrect.');
+          setError('Email ou mot de passe incorrect.');
         }
       } else {
         setError('Erreur de connexion. Vérifiez votre connexion internet.');
@@ -66,126 +62,122 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-2 p-3 bg-agri-green rounded-full">
-              <Sprout className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Connexion
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Accédez à votre tableau de bord agricole
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-agri-green/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-agri-brown/5 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
 
-        {/* Formulaire de connexion */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-            {/* Affichage des erreurs */}
+      <div className="max-w-md w-full px-4 relative z-10">
+        {/* Back button */}
+        <Link 
+          to="/" 
+          className="inline-flex items-center text-sm text-gray-500 hover:text-agri-green mb-8 transition-colors group"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          Retour à l'accueil
+        </Link>
+
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 overflow-hidden border border-gray-100">
+          <div className="p-8 sm:p-10">
+            {/* Header */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center justify-center p-4 bg-green-50 rounded-2xl mb-6">
+                <Sprout className="h-10 w-10 text-agri-green" />
+              </div>
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                Bon retour !
+              </h2>
+              <p className="mt-2 text-gray-500">
+                Connectez-vous pour gérer votre exploitation
+              </p>
+            </div>
+
+            {/* Error Display */}
             {error && (
-              <div className="alert alert-error">
-                <p className="text-sm">{error}</p>
+              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <ShieldCheck className="h-5 w-5 text-red-500" />
+                </div>
+                <p className="text-sm text-red-700 font-medium">{error}</p>
               </div>
             )}
 
-            {/* Nom d'utilisateur */}
-            <div>
-              <label htmlFor="username" className="form-label">
-                Nom d'utilisateur
-              </label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                required
-                value={formData.username}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Entrez votre nom d'utilisateur"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Mot de passe */}
-            <div>
-              <label htmlFor="password" className="form-label">
-                Mot de passe
-              </label>
-              <div className="relative">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700 ml-1">Email</label>
                 <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  name="email"
+                  type="email"
                   required
-                  value={formData.password}
+                  value={formData.email}
                   onChange={handleChange}
-                  className="form-input pr-10"
-                  placeholder="Entrez votre mot de passe"
+                  className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-agri-green transition-all"
+                  placeholder="exemple@email.com"
                   disabled={loading}
                 />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
               </div>
-            </div>
 
-            {/* Bouton de connexion */}
-            <div className="pt-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-sm font-bold text-gray-700">Mot de passe</label>
+                  <a href="#" className="text-xs font-semibold text-agri-green hover:underline">Oublié ?</a>
+                </div>
+                <div className="relative">
+                  <Input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-agri-green transition-all pr-12"
+                    placeholder="Votre mot de passe"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-primary flex items-center justify-center"
+                className="w-full h-14 rounded-2xl bg-agri-green hover:bg-agri-dark-green text-white text-lg font-bold shadow-lg shadow-green-100 transition-all active:scale-[0.98]"
               >
                 {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Connexion en cours...
-                  </>
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Connexion...</span>
+                  </div>
                 ) : (
                   'Se connecter'
                 )}
               </Button>
+            </form>
+
+            <div className="mt-10 pt-10 border-t border-gray-50 text-center">
+              <p className="text-gray-500">
+                Pas encore membre ?{' '}
+                <Link
+                  to="/register"
+                  className="font-bold text-agri-green hover:text-agri-dark-green transition-colors"
+                >
+                  Créer un compte gratuit
+                </Link>
+              </p>
             </div>
-          </div>
-
-          {/* Lien vers l'inscription */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Vous n'avez pas de compte ?{' '}
-              <Link
-                to="/register"
-                className="font-medium text-agri-green hover:text-green-700 transition-colors duration-200"
-              >
-                Créer un compte
-              </Link>
-            </p>
-          </div>
-        </form>
-
-        {/* Informations supplémentaires */}
-        <div className="mt-8 text-center">
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Gestion Agricole
-            </h3>
-            <p className="text-sm text-gray-600">
-              Suivez vos cultures, récoltes et dépenses pour optimiser 
-              votre rendement agricole.
-            </p>
           </div>
         </div>
       </div>

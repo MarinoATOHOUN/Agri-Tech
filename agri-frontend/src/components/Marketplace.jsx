@@ -18,7 +18,8 @@ import {
     Loader2,
     Image as ImageIcon,
     CheckCircle2,
-    AlertCircle
+    AlertCircle,
+    User
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -212,6 +213,20 @@ const Marketplace = () => {
                             </div>
 
                             <CardContent className="p-5 flex-grow space-y-3">
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <div className="h-6 w-6 rounded-full bg-agri-green/10 flex items-center justify-center overflow-hidden">
+                                        {annonce.vendeur_photo ? (
+                                            <img 
+                                                src={annonce.vendeur_photo} 
+                                                alt={annonce.vendeur_nom} 
+                                                className="h-full w-full object-cover" 
+                                            />
+                                        ) : (
+                                            <User className="h-3 w-3 text-agri-green" />
+                                        )}
+                                    </div>
+                                    <span className="text-[10px] font-medium text-gray-500">{annonce.vendeur_nom}</span>
+                                </div>
                                 <div className="flex justify-between items-start">
                                     <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{annonce.nom}</h3>
                                     <p className="text-agri-green font-black text-lg">

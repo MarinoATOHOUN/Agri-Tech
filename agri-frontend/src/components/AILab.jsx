@@ -1,6 +1,6 @@
 // © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
- * Composant AILab pour présenter les futures innovations IA d'AgriGestion.
+ * Composant AILab pour présenter les futures innovations IA de GreenMetric.
  */
 
 import { useState } from 'react';

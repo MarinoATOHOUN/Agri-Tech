@@ -18,14 +18,15 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, SupportMessage, ProduitAnnonce
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, SupportMessage, ProduitAnnonce, NewsletterSubscription, ContactMessage
 from .serializers import (
     UtilisateurSerializer, UtilisateurProfilSerializer, CultureSerializer,
     RecolteSerializer, DepenseSerializer, ConseilAgricoleSerializer,
     LoginSerializer, DashboardStatsSerializer, CultureDetailSerializer,
-    RapportIASerializer, ConversationSerializer, MessageChatSerializer, SupportMessageSerializer, ProduitAnnonceSerializer
+    RapportIASerializer, ConversationSerializer, MessageChatSerializer, SupportMessageSerializer, ProduitAnnonceSerializer,
+    ChangePasswordSerializer, NewsletterSubscriptionSerializer, ContactMessageSerializer
 )
-from .ai_service import GeminiService
+from .ai_service import GroqService
 from .utils import generate_report_pdf
 
 
@@ -93,6 +94,24 @@ def logout_view(request):
         return Response({
             'message': 'Erreur lors de la déconnexion'
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def change_password_view(request):
+    """
+    Vue pour changer le mot de passe de l'utilisateur.
+    """
+    serializer = ChangePasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        user = request.user
+        if not user.check_password(serializer.validated_data['current_password']):
+            return Response({'current_password': ['Mot de passe actuel incorrect.']}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({'message': 'Mot de passe modifié avec succès.'})
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CultureListCreateView(generics.ListCreateAPIView):
@@ -583,7 +602,7 @@ def cultures_options(request):
 @permission_classes([permissions.IsAuthenticated])
 def chatbot_view(request):
     """
-    Vue pour interagir avec le chatbot Gemini en utilisant les données de l'utilisateur.
+    Vue pour interagir avec le chatbot Groq en utilisant les données de l'utilisateur.
     Gère maintenant l'historique des conversations.
     """
     user = request.user
@@ -645,8 +664,8 @@ def chatbot_view(request):
         culture = next((c for c in cultures if c.id == r['culture']), None)
         r['culture_nom'] = culture.nom if culture else "Inconnue"
 
-    # Appeler le service Gemini
-    ai_service = GeminiService()
+    # Appeler le service Groq
+    ai_service = GroqService()
     
     # Récupérer l'historique récent pour le contexte (optionnel, à implémenter dans ai_service)
     # history = conversation.messages.order_by('date_envoi')[:10]
@@ -748,8 +767,8 @@ def generate_rapport_view(request):
     if last_report:
         previous_summary = f"Dernier rapport ({last_report.date_creation}) : {last_report.analyse_complete[:500]}..."
 
-    # 3. Appeler l'IA
-    ai_service = GeminiService()
+    # 3. Appeler l'IA Groq
+    ai_service = GroqService()
     report_data = ai_service.generate_full_report(user_data, previous_summary)
     
     if not report_data:
@@ -853,3 +872,19 @@ def simuler_paiement_annonce(request, pk):
     except ProduitAnnonce.DoesNotExist:
         return Response({'status': 'error', 'message': 'Annonce non trouvée.'}, status=status.HTTP_404_NOT_FOUND)
 
+
+class NewsletterSubscriptionView(generics.CreateAPIView):
+    """
+    Vue pour l'inscription à la newsletter.
+    """
+    queryset = NewsletterSubscription.objects.all()
+    serializer_class = NewsletterSubscriptionSerializer
+    permission_classes = [permissions.AllowAny]
+
+class ContactMessageCreateView(generics.CreateAPIView):
+    """
+    Vue pour soumettre un message via le formulaire de contact.
+    """
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    permission_classes = [permissions.AllowAny]

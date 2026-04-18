@@ -11,7 +11,8 @@ import axios from 'axios';
 // Configuration de base d'Axios
 // Remplacez par l'URL de votre backend : en local : 'http://localhost:8000/api' ou en production : 'https://votre-domaine.com/api'.
 // Pour ce projet, nous utilisons l'URL de déploiement sur PythonAnywhere. 'https://johnny001.pythonanywhere.com/api'
-const API_BASE_URL = 'http://localhost:8000/api';
+// Configuration pour local et production (via env variable)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 // Instance Axios configurée
 const api = axios.create({
@@ -87,8 +88,22 @@ export const authService = {
 
   // Mettre à jour le profil utilisateur
   updateProfile: async (profileData) => {
-    const response = await api.patch('/auth/profile/', profileData);
+    let headers = { 'Content-Type': 'application/json' };
+    let data = profileData;
+
+    // Si on a un objet FormData (pour les fichiers)
+    if (profileData instanceof FormData) {
+      headers['Content-Type'] = 'multipart/form-data';
+    }
+
+    const response = await api.patch('/auth/profile/', data, { headers });
     localStorage.setItem('user', JSON.stringify(response.data));
+    return response.data;
+  },
+
+  // Changer le mot de passe
+  changePassword: async (passwordData) => {
+    const response = await api.post('/auth/change-password/', passwordData);
     return response.data;
   },
 };
@@ -307,7 +322,13 @@ export const annonceService = {
   },
 };
 
+export const newsletterService = {
+  subscribe: (email) => api.post('/newsletter/', { email }),
+};
 
+export const contactService = {
+  sendMessage: (data) => api.post('/contact/', data),
+};
 
 // Utilitaires
 export const utils = {

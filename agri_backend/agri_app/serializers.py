@@ -8,7 +8,7 @@ pour convertir les modèles en JSON et vice versa.
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, SupportMessage, ProduitAnnonce
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, SupportMessage, ProduitAnnonce, NewsletterSubscription, ContactMessage
 
 
 class UtilisateurSerializer(serializers.ModelSerializer):
@@ -30,9 +30,25 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             'date_creation', 'date_joined', 'last_login', 'plan_abonnement', 'password', 'password_confirm'
         ]
         extra_kwargs = {
+            'username': {'required': False, 'allow_blank': True},
+            'email': {'required': True, 'allow_blank': False},
             'password': {'write_only': True},
             'date_creation': {'read_only': True},
         }
+
+    def validate_email(self, value):
+        """Valide que l'email est unique (insensible à la casse)."""
+        if not value:
+            raise serializers.ValidationError("L'email est requis.")
+
+        normalized = value.strip().lower()
+        queryset = Utilisateur.objects.filter(email__iexact=normalized)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError("Un compte avec cet email existe déjà.")
+
+        return normalized
     
     def validate(self, attrs):
         """Valide que les mots de passe correspondent."""
@@ -44,6 +60,14 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         """Crée un nouvel utilisateur avec un mot de passe haché."""
         validated_data.pop('password_confirm', None)
         password = validated_data.pop('password')
+        username = (validated_data.get('username') or '').strip()
+        email = (validated_data.get('email') or '').strip().lower()
+        validated_data['email'] = email
+
+        # Si le frontend ne fournit pas de username, on l'aligne sur l'email
+        # afin de permettre l'authentification Django via username en interne.
+        if not username:
+            validated_data['username'] = email
         user = Utilisateur.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
@@ -74,7 +98,7 @@ class UtilisateurProfilSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'type_agriculture', 'zone_geographique', 'telephone',
-            'date_creation', 'date_joined', 'last_login', 'plan_abonnement'
+            'date_creation', 'date_joined', 'last_login', 'plan_abonnement', 'photo_profil'
         ]
         read_only_fields = ['id', 'username', 'date_creation', 'date_joined', 'last_login']
 
@@ -194,29 +218,49 @@ class LoginSerializer(serializers.Serializer):
     Serializer pour l'authentification des utilisateurs.
     """
     
-    username = serializers.CharField()
+    # Compatibilité : accepter encore "username" pendant la transition,
+    # mais l'UI doit utiliser "email".
+    email = serializers.EmailField(required=False, allow_blank=True)
+    username = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField()
     
     def validate(self, attrs):
         """Valide les informations de connexion."""
+        email = attrs.get('email')
         username = attrs.get('username')
         password = attrs.get('password')
         
-        if username and password:
+        if email and password:
+            email = email.strip().lower()
+            matching_users = Utilisateur.objects.filter(email__iexact=email)
+            if not matching_users.exists():
+                raise serializers.ValidationError('Email ou mot de passe incorrect.')
+            if matching_users.count() > 1:
+                raise serializers.ValidationError(
+                    "Plusieurs comptes utilisent cet email. Veuillez contacter le support."
+                )
+
+            user_obj = matching_users.first()
+            user = authenticate(username=user_obj.username, password=password)
+            if not user:
+                raise serializers.ValidationError('Email ou mot de passe incorrect.')
+            if not user.is_active:
+                raise serializers.ValidationError('Ce compte utilisateur est désactivé.')
+
+            attrs['user'] = user
+            return attrs
+        elif username and password:
             user = authenticate(username=username, password=password)
             if not user:
-                raise serializers.ValidationError(
-                    'Nom d\'utilisateur ou mot de passe incorrect.'
-                )
+                raise serializers.ValidationError('Email ou mot de passe incorrect.')
             if not user.is_active:
-                raise serializers.ValidationError(
-                    'Ce compte utilisateur est désactivé.'
-                )
+                raise serializers.ValidationError('Ce compte utilisateur est désactivé.')
+
             attrs['user'] = user
             return attrs
         else:
             raise serializers.ValidationError(
-                'Le nom d\'utilisateur et le mot de passe sont requis.'
+                'L\'email et le mot de passe sont requis.'
             )
 
 
@@ -299,15 +343,43 @@ class ProduitAnnonceSerializer(serializers.ModelSerializer):
     Serializer pour les annonces de produits.
     """
     vendeur_nom = serializers.ReadOnlyField(source='utilisateur.get_full_name')
+    vendeur_photo = serializers.ImageField(source='utilisateur.photo_profil', read_only=True)
     
     class Meta:
         model = ProduitAnnonce
         fields = [
-            'id', 'utilisateur', 'vendeur_nom', 'nom', 'description', 'prix', 
+            'id', 'utilisateur', 'vendeur_nom', 'vendeur_photo', 'nom', 'description', 'prix', 
             'unite', 'quantite_disponible', 'categorie', 'localisation', 
             'image', 'telephone_contact', 'email_contact', 'lien_externe', 
             'est_publie', 'paiement_effectue', 'date_creation'
         ]
         read_only_fields = ['id', 'utilisateur', 'est_publie', 'paiement_effectue', 'date_creation']
 
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer pour le changement de mot de passe.
+    """
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
+    confirm_password = serializers.CharField(required=True)
 
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Les mots de passe ne correspondent pas."})
+        return attrs
+
+class NewsletterSubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour les inscriptions à la newsletter.
+    """
+    class Meta:
+        model = NewsletterSubscription
+        fields = ['id', 'email', 'date_inscription']
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour les messages de contact.
+    """
+    class Meta:
+        model = ContactMessage
+        fields = ['id', 'nom', 'email', 'sujet', 'message', 'date_envoi']

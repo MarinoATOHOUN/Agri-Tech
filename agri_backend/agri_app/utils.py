@@ -19,7 +19,7 @@ class PDFReport(FPDF):
         self.set_font('helvetica', 'B', 24)
         self.set_text_color(255, 255, 255)
         self.set_xy(10, 10)
-        self.cell(0, 15, 'AgriGestion', border=False, ln=True)
+        self.cell(0, 15, 'GreenMetric', border=False, ln=True)
         
         # Sous-titre
         self.set_font('helvetica', 'I', 12)
@@ -32,7 +32,7 @@ class PDFReport(FPDF):
         self.set_y(-20)
         self.set_font('helvetica', 'I', 8)
         self.set_text_color(128, 128, 128)
-        self.cell(0, 10, f'AgriGestion - Rapport généré le {datetime.now().strftime("%d/%m/%Y à %H:%M")} - Page {self.page_no()}/{{nb}}', align='C')
+        self.cell(0, 10, f'GreenMetric - Rapport généré le {datetime.now().strftime("%d/%m/%Y à %H:%M")} - Page {self.page_no()}/{{nb}}', align='C')
 
     def chapter_title(self, title, icon_char=None):
         self.set_font('helvetica', 'B', 16)

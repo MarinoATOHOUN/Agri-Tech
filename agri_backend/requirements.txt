@@ -18,12 +18,13 @@ fonttools==4.61.1
 fpdf2==2.8.5
 future==1.0.0
 geocoder==1.38.1
-google-ai-generativelanguage==0.6.10
-google-api-core==2.28.1
-google-api-python-client==2.187.0
-google-auth==2.45.0
-google-auth-httplib2==0.3.0
-google-generativeai==0.8.3
+# google-ai-generativelanguage==0.6.10
+# google-api-core==2.28.1
+# google-api-python-client==2.187.0
+# google-auth==2.45.0
+# google-auth-httplib2==0.3.0
+# google-generativeai==0.8.3
+openai
 googleapis-common-protos==1.72.0
 grpcio==1.76.0
 grpcio-status==1.71.2
@@ -56,3 +57,4 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.6.2
+whitenoise==6.6.0

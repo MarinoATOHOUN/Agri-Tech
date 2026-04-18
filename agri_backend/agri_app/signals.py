@@ -14,7 +14,7 @@ def notify_welcome(sender, instance, created, **kwargs):
     if created:
         ConseilAgricole.objects.create(
             utilisateur=instance,
-            titre="Bienvenue sur AgriGestion !",
+            titre="Bienvenue sur GreenMetric !",
             contenu=f"Bonjour {instance.first_name}, nous sommes ravis de vous accompagner dans la gestion de votre exploitation. Commencez par ajouter votre première culture pour bénéficier de nos conseils !",
             type_conseil='technique',
             priorite='moyenne'

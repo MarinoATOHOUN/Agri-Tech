@@ -81,7 +81,7 @@ const Support = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Support & Propositions</h1>
                     <p className="text-gray-600 mt-1">
-                        Besoin d'aide ou une idée pour améliorer AgriGestion ? Nous sommes à votre écoute.
+                        Besoin d'aide ou une idée pour améliorer GreenMetric ? Nous sommes à votre écoute.
                     </p>
                 </div>
             </div>

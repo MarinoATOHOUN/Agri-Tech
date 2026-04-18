@@ -34,6 +34,9 @@ import Support from './components/Support';
 import Marketplace from './components/Marketplace';
 import AnnonceForm from './components/AnnonceForm';
 import AILab from './components/AILab';
+import Privacy from './components/Privacy';
+import Terms from './components/Terms';
+import Contact from './components/Contact';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -117,6 +120,9 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/contact" element={<Contact />} />
 
           {/* Routes privées avec Layout */}
           <Route

@@ -1,9 +1,10 @@
 // © 2025 - Développé par BlackBenAI (Fondateur: Marino ATOHOUN)
 /**
- * Page d'accueil (Landing Page) pour AgriGestion.
+ * Page d'accueil (Landing Page) pour GreenMetric.
  * Conçue pour présenter la vision de BlackBenAI et attirer les utilisateurs.
  */
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
     ArrowRight,
@@ -18,10 +19,38 @@ import {
     Sparkles,
     Scan,
     BrainCircuit,
-    CheckCircle2
+    CheckCircle2,
+    Send,
+    Loader2,
+    Mail
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { newsletterService } from '../services/api';
 
 const LandingPage = () => {
+    const [newsletterEmail, setNewsletterEmail] = useState('');
+    const [newsletterLoading, setNewsletterLoading] = useState(false);
+    const [newsletterStatus, setNewsletterStatus] = useState(null); // 'success', 'error'
+
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+        if (!newsletterEmail) return;
+
+        setNewsletterLoading(true);
+        try {
+            await newsletterService.subscribe(newsletterEmail);
+            setNewsletterStatus('success');
+            setNewsletterEmail('');
+        } catch (error) {
+            console.error('Erreur newsletter:', error);
+            setNewsletterStatus('error');
+        } finally {
+            setNewsletterLoading(false);
+            setTimeout(() => setNewsletterStatus(null), 5000);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white overflow-hidden">
             {/* Navigation */}
@@ -30,7 +59,7 @@ const LandingPage = () => {
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center">
                             <Leaf className="h-8 w-8 text-agri-green" />
-                            <span className="ml-2 text-2xl font-bold text-gray-900">AgriGestion</span>
+                            <span className="ml-2 text-2xl font-bold text-gray-900">GreenMetric</span>
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#features" className="text-gray-600 hover:text-agri-green transition-colors">Fonctionnalités</a>
@@ -59,7 +88,7 @@ const LandingPage = () => {
                                 Révolutionnez votre <span className="text-agri-green">Rendement Agricole</span> par l'IA
                             </h1>
                             <p className="text-xl text-gray-600 max-w-xl leading-relaxed">
-                                AgriGestion transforme chaque donnée de votre exploitation en levier de croissance.
+                                GreenMetric transforme chaque donnée de votre exploitation en levier de croissance.
                                 Une solution pensée par des Africains, pour l'émancipation technologique du continent.
                             </p>
                             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -251,7 +280,7 @@ const LandingPage = () => {
                             </h2>
                             <p className="text-xl text-gray-300 leading-relaxed">
                                 Chez <span className="text-white font-bold">BlackBenAI</span>, nous croyons que la sécurité alimentaire de l'Afrique passera par l'intelligence artificielle.
-                                AgriGestion n'est pas qu'un outil, c'est une arme contre la pauvreté et pour l'émancipation économique.
+                                GreenMetric n'est pas qu'un outil, c'est une arme contre la pauvreté et pour l'émancipation économique.
                             </p>
                             <div className="space-y-6">
                                 {[
@@ -284,11 +313,10 @@ const LandingPage = () => {
                     <h2 className="text-4xl font-bold text-gray-900 mb-8">La Vision BlackBenAI</h2>
                     <p className="text-2xl text-gray-600 max-w-4xl mx-auto italic leading-relaxed">
                         "Nous ne construisons pas seulement des logiciels. Nous construisons l'avenir technologique de l'Afrique.
-                        Chaque ligne de code d'AgriGestion est un pas vers un continent souverain et prospère."
+                        Chaque ligne de code de GreenMetric est un pas vers un continent souverain et prospère."
                     </p>
                     <div className="mt-12">
-                        <p className="font-bold text-gray-900 text-xl">Marino ATOHOUN</p>
-                        <p className="text-gray-500">Fondateur & CEO, BlackBenAI</p>
+                        <p className="text-gray-500 font-bold">Fondateur & CEO, BlackBenAI</p>
                     </div>
                 </div>
             </section>
@@ -316,47 +344,123 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            {/* Newsletter Section */}
+            <section className="py-20 px-4 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full bg-agri-green/5 -z-10" />
+                <div className="max-w-5xl mx-auto">
+                    <div className="bg-white rounded-[3rem] p-8 md:p-16 shadow-2xl shadow-green-100/50 border border-green-50 relative overflow-hidden">
+                        {/* Decorative circles */}
+                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-agri-green/10 rounded-full blur-3xl" />
+                        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-agri-brown/5 rounded-full blur-3xl" />
+                        
+                        <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                            <div>
+                                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-green-50 text-agri-green rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+                                    <Sparkles className="h-3 w-3" />
+                                    <span>Restez Informé</span>
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-4">
+                                    Cultivons ensemble <br />
+                                    <span className="text-agri-green">l'agriculture de demain</span>
+                                </h2>
+                                <p className="text-gray-500 text-lg">
+                                    Recevez chaque semaine nos meilleurs conseils, analyses de marché et actualités tech directement dans votre boîte mail.
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <form onSubmit={handleNewsletterSubmit} className="space-y-4">
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-agri-green transition-colors" />
+                                        </div>
+                                        <Input
+                                            type="email"
+                                            placeholder="votre@email.com"
+                                            value={newsletterEmail}
+                                            onChange={(e) => setNewsletterEmail(e.target.value)}
+                                            className="h-16 pl-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-agri-green transition-all text-lg"
+                                            disabled={newsletterLoading}
+                                            required
+                                        />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        disabled={newsletterLoading}
+                                        className="w-full h-16 rounded-2xl bg-agri-green hover:bg-agri-dark-green text-white text-lg font-bold shadow-lg shadow-green-200 transition-all active:scale-[0.98]"
+                                    >
+                                        {newsletterLoading ? (
+                                            <Loader2 className="h-6 w-6 animate-spin" />
+                                        ) : (
+                                            <div className="flex items-center space-x-2">
+                                                <span>S'abonner maintenant</span>
+                                                <Send className="h-5 w-5" />
+                                            </div>
+                                        )}
+                                    </Button>
+                                    
+                                    {newsletterStatus === 'success' && (
+                                        <div className="flex items-center space-x-2 text-agri-green bg-green-50 p-3 rounded-xl animate-in fade-in zoom-in">
+                                            <CheckCircle2 className="h-5 w-5" />
+                                            <span className="text-sm font-bold">Bienvenue dans la communauté !</span>
+                                        </div>
+                                    )}
+                                    
+                                    {newsletterStatus === 'error' && (
+                                        <div className="flex items-center space-x-2 text-red-500 bg-red-50 p-3 rounded-xl animate-in fade-in zoom-in">
+                                            <ShieldCheck className="h-5 w-5" />
+                                            <span className="text-sm font-bold">Erreur. Veuillez vérifier votre email.</span>
+                                        </div>
+                                    )}
+                                    
+                                    <p className="text-center text-xs text-gray-400">
+                                        Pas de spam. Désabonnez-vous à tout moment.
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Footer */}
-            <footer className="bg-gray-50 py-12 border-t border-gray-100">
+            <footer className="bg-gray-900 text-white py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-4 gap-12 mb-12">
-                        <div className="col-span-2 space-y-6">
+                    <div className="grid md:grid-cols-3 gap-16 mb-16">
+                        <div className="space-y-6">
                             <div className="flex items-center">
                                 <Leaf className="h-8 w-8 text-agri-green" />
-                                <span className="ml-2 text-2xl font-bold text-gray-900">AgriGestion</span>
+                                <span className="ml-2 text-2xl font-bold">GreenMetric</span>
                             </div>
-                            <p className="text-gray-500 max-w-sm">
-                                Une initiative de BlackBenAI pour l'émancipation technologique et la sécurité alimentaire en Afrique.
+                            <p className="text-gray-400 leading-relaxed">
+                                Transformer l'agriculture africaine par l'intelligence artificielle. Une initiative de BlackBenAI pour un continent prospère.
                             </p>
-                            <div className="flex space-x-4">
-                                {/* Social icons placeholders */}
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="h-10 w-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:text-agri-green cursor-pointer transition-colors">
-                                        <Users className="h-5 w-5" />
-                                    </div>
-                                ))}
-                            </div>
                         </div>
+                        
                         <div>
-                            <h4 className="font-bold text-gray-900 mb-6">Produit</h4>
-                            <ul className="space-y-4 text-gray-600">
-                                <li><a href="#features" className="hover:text-agri-green">Fonctionnalités</a></li>
-                                <li><Link to="/register" className="hover:text-agri-green">Tarifs (Gratuit)</Link></li>
-                                <li><a href="#" className="hover:text-agri-green">Témoignages</a></li>
+                            <h4 className="font-bold mb-8 uppercase text-xs tracking-widest text-agri-green">Navigation</h4>
+                            <ul className="space-y-4 text-gray-400 text-sm">
+                                <li><a href="#features" className="hover:text-white transition-colors">Fonctionnalités</a></li>
+                                <li><Link to="/register" className="hover:text-white transition-colors">Tarifs & Inscription</Link></li>
+                                <li><a href="https://www.blackbenai.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">BlackBenAI</a></li>
                             </ul>
                         </div>
+
                         <div>
-                            <h4 className="font-bold text-gray-900 mb-6">Entreprise</h4>
-                            <ul className="space-y-4 text-gray-600">
-                                <li><a href="https://site-web-black-ben-ai.vercel.app/" target="_blank" className="hover:text-agri-green">BlackBenAI</a></li>
-                                <li><a href="#" className="hover:text-agri-green">Contact</a></li>
-                                <li><a href="#" className="hover:text-agri-green">Confidentialité</a></li>
+                            <h4 className="font-bold mb-8 uppercase text-xs tracking-widest text-agri-green">Légal & Contact</h4>
+                            <ul className="space-y-4 text-gray-400 text-sm">
+                                <li><Link to="/privacy" className="hover:text-white transition-colors">Confidentialité</Link></li>
+                                <li><Link to="/terms" className="hover:text-white transition-colors">Conditions Générales</Link></li>
+                                <li><Link to="/contact" className="hover:text-white transition-colors">Nous contacter</Link></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-                        <p>© 2025 AgriGestion par BlackBenAI. Tous droits réservés.</p>
-                        <p className="mt-4 md:mt-0">Fait avec ❤️ au Bénin pour l'Afrique.</p>
+                    
+                    <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                        <p>© 2025 GreenMetric par BlackBenAI. Tous droits réservés.</p>
+                        <p className="mt-4 md:mt-0 italic font-medium text-agri-green/60">
+                            "Quand la technologie rencontre la terre, l'Afrique cultive son propre destin."
+                        </p>
                     </div>
                 </div>
             </footer>

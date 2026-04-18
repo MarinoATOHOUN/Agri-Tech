@@ -10,7 +10,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from django.db.models import Sum, F
-from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, UserLocation, SupportMessage, ProduitAnnonce
+from .models import Utilisateur, Culture, Recolte, Depense, ConseilAgricole, RapportIA, Conversation, MessageChat, UserLocation, SupportMessage, ProduitAnnonce, NewsletterSubscription, ContactMessage
 
 
 # --- INLINES ---
@@ -480,5 +480,30 @@ class ProduitAnnonceAdmin(admin.ModelAdmin):
     def retirer_annonces(self, request, queryset):
         queryset.update(est_publie=False)
     retirer_annonces.short_description = "Retirer les annonces sélectionnées"
+
+@admin.register(NewsletterSubscription)
+class NewsletterSubscriptionAdmin(admin.ModelAdmin):
+    """
+    Configuration de l'administration pour les inscriptions à la newsletter.
+    """
+    list_display = ('email', 'date_inscription')
+    search_fields = ('email',)
+    readonly_fields = ('date_inscription',)
+    list_filter = ('date_inscription',)
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    """
+    Configuration de l'administration pour les messages de contact public.
+    """
+    list_display = ('nom', 'email', 'sujet', 'date_envoi', 'traite')
+    list_filter = ('traite', 'date_envoi')
+    search_fields = ('nom', 'email', 'sujet', 'message')
+    readonly_fields = ('date_envoi',)
+    actions = ['marquer_comme_traite']
+
+    def marquer_comme_traite(self, request, queryset):
+        queryset.update(traite=True)
+    marquer_comme_traite.short_description = "Marquer comme traité"
 
 

@@ -3,12 +3,6 @@
 Configuration Django pour le projet agri_backend.
 
 Généré par 'django-admin startproject' en utilisant Django 5.2.6.
-
-Pour plus d'informations sur ce fichier, voir :
-https://docs.djangoproject.com/en/5.2/topics/settings/
-
-Pour la liste complète des paramètres et leurs valeurs, voir :
-https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
@@ -24,7 +18,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure--hdp5_%o4n78eu$ojs1_6
 # ATTENTION : Ne laissez pas DEBUG activé en production !
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.hf.space']
 
 # Définition des applications
 INSTALLED_APPS = [
@@ -129,6 +123,7 @@ JAZZMIN_UI_TWEAKS = {
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # CORS doit être en premier
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Ajout pour fichiers statiques
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -159,7 +154,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'agri_backend.wsgi.application'
 
 # Configuration de la base de données
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -168,7 +162,6 @@ DATABASES = {
 }
 
 # Validation des mots de passe
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -196,42 +189,46 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
-# Configuration CORS pour permettre les requêtes depuis le frontend React
-# Le frontend Vite tourne sur le port 5173 par défaut.
+# Configuration CORS
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # URL par défaut de React
+    "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://rinogeek-agrigestionfrontend.hf.space",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Permettre tous les headers/origines si configuré (pour debug/flexibilité)
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS = [
+    "https://rinogeek-agrigestionfrontend.hf.space",
+    "https://rinogeek-agrigestionbackend.hf.space",
+]
+
 # Internationalisation
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
 LANGUAGE_CODE = 'fr-fr'
-
-TIME_ZONE = 'Africa/Porto-Novo'  # Fuseau horaire pour l'Afrique de l'Ouest
-
+TIME_ZONE = 'Africa/Porto-Novo'
 USE_I18N = True
-
 USE_TZ = True
 
 # Fichiers statiques (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Fichiers média (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Type de champ de clé primaire par défaut
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuration pour l'authentification personnalisée
 AUTH_USER_MODEL = 'agri_app.Utilisateur'
 
-# Configuration Gemini AI
-GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+# Configuration Groq AI
+GROQ_API_KEY = config('GROQ_API_KEY', default='')

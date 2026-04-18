@@ -1,6 +1,6 @@
-# AgriGestion - Application de Gestion du Rendement Agricole
+# GreenMetric - Application de Gestion du Rendement Agricole
 
-AgriGestion est une application web complète conçue pour aider les agriculteurs en Afrique à suivre et à optimiser leur rendement agricole. Elle permet de gérer les cultures, les récoltes, les dépenses, et offre une vue d'ensemble des performances financières grâce à un tableau de bord interactif.
+GreenMetric est une application web complète conçue pour aider les agriculteurs en Afrique à suivre et à optimiser leur rendement agricole. Elle permet de gérer les cultures, les récoltes, les dépenses, et offre une vue d'ensemble des performances financières grâce à un tableau de bord interactif.
 
 ## Fonctionnalités
 
@@ -43,7 +43,7 @@ Assurez-vous d'avoir les éléments suivants installés sur votre machine :
 
 ## Instructions d'Installation et d'Exécution
 
-Suivez ces étapes pour configurer et exécuter l'application AgriGestion localement.
+Suivez ces étapes pour configurer et exécuter l'application GreenMetric localement.
 
 ### 1. Cloner le dépôt (si applicable)
 
@@ -51,7 +51,7 @@ Si ce projet est hébergé sur un dépôt Git, commencez par le cloner :
 
 ```bash
 git clone <URL_DU_DEPOT>
-cd AgriGestion
+cd GreenMetric
 ```
 
 Dans le contexte de cet environnement de sandbox, les fichiers sont déjà présents dans le répertoire `/home/ubuntu/agri-management-app`.
@@ -170,6 +170,6 @@ Pour le déploiement en production, il est recommandé d'utiliser un serveur web
 **L'Intelligence Artificielle au service de l'Afrique**
 BlackBenAI est une entreprise Béninoise spécialisée dans le développement de solutions IA pour le développement et l'émancipation technologique de l'Afrique. Nous construisons des modèles enracinés dans les réalités africaines pour transformer le continent.
 
-[Visiter le site web de BlackBenAI](https://site-web-black-ben-ai.vercel.app/)
+[Visiter le site web de BlackBenAI](https://www.blackbenai.com/)
 
-© 2025 AgriGestion - Propulsé par BlackBenAI.
+© 2025 GreenMetric - Propulsé par BlackBenAI.

@@ -108,7 +108,7 @@ const Layout = ({ children, user, onLogout }) => {
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Sprout className="h-8 w-8 text-agri-green" />
-            <span className="text-xl font-bold text-gray-900">AgriGestion</span>
+            <span className="text-xl font-bold text-gray-900">GreenMetric</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -173,7 +173,7 @@ const Layout = ({ children, user, onLogout }) => {
                 <Menu className="h-6 w-6" />
               </button>
               <h1 className="ml-2 text-2xl font-semibold text-gray-900 lg:ml-0">
-                Gestion Agricole
+                GreenMetric
               </h1>
             </div>
 
@@ -201,10 +201,18 @@ const Layout = ({ children, user, onLogout }) => {
                     {user?.type_agriculture}
                   </p>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-agri-green flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">
-                    {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
-                  </span>
+                <div className="h-8 w-8 rounded-full bg-agri-green flex items-center justify-center overflow-hidden">
+                  {user?.photo_profil ? (
+                    <img 
+                      src={user.photo_profil.startsWith('http') ? user.photo_profil : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '')}${user.photo_profil}`} 
+                      alt="Profil" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-white">
+                      {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -221,39 +229,17 @@ const Layout = ({ children, user, onLogout }) => {
         </main>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-10 mt-12">
+        <footer className="bg-white border-t border-gray-200 py-6 mt-12">
           <div className="max-w-7xl mx-auto px-4 text-center">
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-agri-green mb-2">BlackBenAI</h3>
-              <p className="text-gray-400 max-w-2xl mx-auto italic">
-                "L'Intelligence Artificielle au service de l'Afrique.
-                BlackBenAI construit des modèles enracinés dans les réalités africaines pour transformer le continent."
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center space-y-4">
-              <p className="text-sm">
-                Développé par <a href="https://site-web-black-ben-ai.vercel.app/" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-agri-green transition-colors">BlackBenAI</a>
-              </p>
-              <p className="text-xs text-gray-500">
-                © 2025 AgriGestion. Tous droits réservés. <br />
-                Marino ATOHOUN - Fondateur & CEO de BlackBenAI.
-              </p>
-              <a
-                href="https://site-web-black-ben-ai.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-full transition-colors"
-              >
-                Visiter le site web
-              </a>
-            </div>
+            <p className="text-xs text-gray-500">
+              © 2025 GreenMetric. Tous droits réservés.
+            </p>
           </div>
         </footer>
       </div>
 
       {/* Chatbot AI */}
-      <Chatbot />
+      <Chatbot user={user} />
     </div>
   );
 };

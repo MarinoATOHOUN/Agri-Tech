@@ -136,7 +136,7 @@ const Abonnement = () => {
                         <h2 className="text-3xl font-bold mb-4">Besoin d'une solution sur mesure ?</h2>
                         <p className="text-gray-400 text-lg mb-8">
                             Vous représentez un gouvernement, une ONG ou une très grande coopérative ?
-                            Nous pouvons adapter AgriGestion à vos besoins spécifiques avec des intégrations personnalisées.
+                            Nous pouvons adapter GreenMetric à vos besoins spécifiques avec des intégrations personnalisées.
                         </p>
                         <Button className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-8 py-4 rounded-xl">
                             Discuter avec un expert
@@ -145,7 +145,7 @@ const Abonnement = () => {
                     <div className="mt-12 lg:mt-0 lg:ml-12">
                         <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700">
                             <p className="italic text-gray-300 mb-4">
-                                "AgriGestion a transformé ma façon de voir mon exploitation. Je ne suis plus juste un cultivateur, je suis un chef d'entreprise."
+                                "GreenMetric a transformé ma façon de voir mon exploitation. Je ne suis plus juste un cultivateur, je suis un chef d'entreprise."
                             </p>
                             <div className="flex items-center">
                                 <div className="h-10 w-10 rounded-full bg-agri-green mr-3" />

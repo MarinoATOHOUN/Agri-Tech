@@ -5,7 +5,7 @@ import { Send, MessageSquare, X, User, Cpu } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const Chatbot = () => {
+const Chatbot = ({ user }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [chatHistory, setChatHistory] = useState([
@@ -93,9 +93,19 @@ const Chatbot = () => {
                                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`flex gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-agri-green text-white' : 'bg-white border border-gray-200 text-agri-green'
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${msg.role === 'user' ? 'bg-agri-green text-white' : 'bg-white border border-gray-200 text-agri-green'
                                         }`}>
-                                        {msg.role === 'user' ? <User size={14} /> : <Cpu size={14} />}
+                                        {msg.role === 'user' ? (
+                                            user?.photo_profil ? (
+                                                <img 
+                                                    src={user.photo_profil.startsWith('http') ? user.photo_profil : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '')}${user.photo_profil}`} 
+                                                    alt="Profil" 
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <User size={14} />
+                                            )
+                                        ) : <Cpu size={14} />}
                                     </div>
                                     <div className={`p-3 rounded-2xl text-sm ${msg.role === 'user'
                                         ? 'bg-agri-green text-white rounded-tr-none'

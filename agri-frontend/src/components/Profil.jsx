@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { User, Save, Loader2, Eye, EyeOff } from 'lucide-react';
+import { User, Save, Loader2, Eye, EyeOff, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,10 @@ const Profil = ({ user, setUser }) => {
     telephone: user?.telephone || '',
     type_agriculture: user?.type_agriculture || 'vivriere',
     zone_geographique: user?.zone_geographique || '',
+    photo_profil: null,
   });
+  
+  const [photoPreview, setPhotoPreview] = useState(user?.photo_profil || null);
 
   const [passwordData, setPasswordData] = useState({
     current_password: '',
@@ -57,6 +60,18 @@ const Profil = ({ user, setUser }) => {
         ...prev,
         [name]: ''
       }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, photo_profil: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -133,7 +148,14 @@ const Profil = ({ user, setUser }) => {
     setSuccess('');
 
     try {
-      const updatedUser = await authService.updateProfile(formData);
+      const data = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== null) {
+          data.append(key, formData[key]);
+        }
+      });
+
+      const updatedUser = await authService.updateProfile(data);
       setUser(updatedUser);
       setSuccess('Profil mis à jour avec succès !');
     } catch (error) {
@@ -224,6 +246,37 @@ const Profil = ({ user, setUser }) => {
                   <p className="text-sm">{success}</p>
                 </div>
               )}
+
+              {/* Photo de profil */}
+              <div className="flex flex-col items-center space-y-4 mb-6">
+                <div className="relative group">
+                  <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-agri-green/20 shadow-inner bg-gray-100 flex items-center justify-center">
+                    {photoPreview ? (
+                      <img 
+                        src={photoPreview.startsWith('data:') ? photoPreview : (photoPreview.startsWith('http') ? photoPreview : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '')}${photoPreview}`)} 
+                        alt="Profil" 
+                        className="h-full w-full object-cover" 
+                      />
+                    ) : (
+                      <User className="h-12 w-12 text-gray-400" />
+                    )}
+                  </div>
+                  <label 
+                    htmlFor="photo-upload" 
+                    className="absolute bottom-0 right-0 bg-agri-green text-white p-1.5 rounded-full cursor-pointer shadow-lg hover:bg-agri-dark-green transition-colors"
+                  >
+                    <Camera size={16} />
+                    <input 
+                      id="photo-upload" 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">Cliquez sur l'icône pour changer votre photo</p>
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-group">

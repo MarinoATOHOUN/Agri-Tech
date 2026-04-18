@@ -61,6 +61,13 @@ class Utilisateur(AbstractUser):
         verbose_name="Plan d'abonnement"
     )
 
+    photo_profil = models.ImageField(
+        upload_to='profils/',
+        null=True,
+        blank=True,
+        verbose_name="Photo de profil"
+    )
+
     date_creation = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Date de création du compte"
@@ -722,3 +729,36 @@ class ProduitAnnonce(models.Model):
 
     def __str__(self):
         return f"{self.nom} - {self.prix} FCFA"
+class NewsletterSubscription(models.Model):
+    """
+    Modèle pour stocker les inscriptions à la newsletter.
+    """
+    email = models.EmailField(unique=True)
+    date_inscription = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Inscription Newsletter"
+        verbose_name_plural = "Inscriptions Newsletter"
+
+    def __str__(self):
+        return self.email
+
+class ContactMessage(models.Model):
+    """
+    Modèle pour stocker les messages du formulaire de contact public.
+    """
+    nom = models.CharField(max_length=200, verbose_name="Nom complet")
+    email = models.EmailField(verbose_name="Email")
+    sujet = models.CharField(max_length=200, verbose_name="Sujet")
+    message = models.TextField(verbose_name="Message")
+    date_envoi = models.DateTimeField(auto_now_add=True, verbose_name="Date d'envoi")
+    traite = models.BooleanField(default=False, verbose_name="Traité")
+
+    class Meta:
+        verbose_name = "Message de Contact"
+        verbose_name_plural = "Messages de Contact"
+        ordering = ['-date_envoi']
+
+    def __str__(self):
+        return f"{self.nom} - {self.sujet}"
+
